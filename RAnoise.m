@@ -22,6 +22,12 @@ function [A,b,x,ProbInfo] = RAnoise(varargin)
 %       The amount of noise added is Rnoise * (rand() - 0.5). Default 0.5.
 %   AngNoise: The scalaring constant on the amount of noise added to the angles. 
 %       The amount of noise added is Rnoise * (rand() - 0.5). Default 0.5.
+%
+% Output
+%   A: Matrix of true data with perturbation
+%   b: Right hand side vector of true data
+%   x: True x vector
+%   ProbInfo: struct for use in displaying images in PRshow
 
 
 % varargin allows for a different amount of aurguments to be passed into
