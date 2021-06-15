@@ -16,6 +16,8 @@ function [A,b,x,ProbInfo] = RAnoise(varargin)
 %   AngNoise: The scalaring constant on the amount of noise added to the angles. 
 %       The amount of noise added is Rnoise * (rand() - 0.5). Default 0.5.
 
+% varargin allows for a different amount of aurguments to be passed into
+% the function.
 if length(varargin) < 3
     error("ERROR: RAnoise not enough aurguments")
 end
@@ -32,6 +34,10 @@ switch length(varargin)
     case 4
         Ntheta = varargin{4};
         Rnoise = 0.5;
+        AngNoise = 0.5;
+    case 5
+        Ntheta = varargin{4};
+        Rnoise = varargin{5};
         AngNoise = 0.5;
     case 6
         Ntheta = varargin{4};
