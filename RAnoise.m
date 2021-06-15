@@ -8,9 +8,9 @@ function [A,b,x,ProbInfo] = RAnoise(varargin)
 % Input:
 %   n: The size of the image such that the size is n x n
 %   Rstart: The value of R to add noise to.
-%   angles: The angels to add noise to in the problem. 
+%   angles: The angles to add noise to in the problem. 
 %   Ntheta: The number of times to change the noise on R at evenly spaced 
-%       increments of angles. Default length(angles).
+%       increments of angles. Default length (angles).
 %   Rnoise: The scalaring constant on the amount of noise added to R. 
 %       The amount of noise added is Rnoise * (rand() - 0.5). Default 0.5.
 %   AngNoise: The scalaring constant on the amount of noise added to the angles. 
