@@ -16,8 +16,9 @@ function [A,b,x,ProbInfo] = RAnoise(varargin)
 %       to 'sheppLogan'.
 %
 %   Optional Aurguments
-%   Ntheta: The number of times to change the noise on R at evenly spaced 
-%       increments of angles. Default length(inOptions.angles).
+%   Ntheta: The number of times to change the noise on R and the angles at  
+%       evenly spaced increments of angles. Must divide the numer of angles. 
+%       Default length(inOptions.angles).
 %   Rnoise: The scalaring constant on the amount of noise added to R. 
 %       The amount of noise added is Rnoise * (rand() - 0.5). Default 0.5.
 %   AngNoise: The scalaring constant on the amount of noise added to the angles. 
@@ -76,37 +77,26 @@ switch length(varargin)
         AngNoise = varargin{5};
 end
 
-%See the documentation on PRtomo to see why this is
-numRows = round(sqrt(2) * n) * length(angles);
-
 A = [ ];
 
-b = zeros(numRows,1);
+b = [ ];
 
-%See PRtomo documentation and code for why this number
-rowsPerIter = round(sqrt(2) * n);
+anglesPerIter = length(angles) / Ntheta;
 
+if round(anglesPerIter) ~= anglesPerIter
+    error("ERROR: RAnoise Ntheta does not divide the number of angles")
+end
 
-changeRN = round(length(angles) / Ntheta );
-
-RN = Rstart + Rnoise * (rand() - 0.5);
-
-numIter = 0;
-
-for i = angles
-    anglesN = i + AngNoise * (rand() - 0.5);
+for i = 0:Ntheta - 1
+    RN = Rstart + Rnoise * (rand() - 0.5);
+    anglesN = angles((i * anglesPerIter) + 1: (i + 1) * anglesPerIter) + ...
+        AngNoise * (rand() - 0.5);
     options = PRset('CTtype','fancurved','phantomImage', inOptions.phantomImage,...
         'angles',anglesN, 'R', RN);
     [An,bn,xn,ProbInfo] = PRtomo(n,options);
     A = [A; An]; %The fastest way despite reallocation in each loop.
-    b(numIter * rowsPerIter + 1: (numIter + 1) * rowsPerIter) = bn;
-    numIter = numIter + 1;
-    if mod(numIter, changeRN) == 0
-        RN = Rstart + Rnoise * (rand() - 0.5);
-    end
+    b = [b; bn];
 end
 ProbInfo.bSize = size(b);
 x = xn;
-
-end
 
