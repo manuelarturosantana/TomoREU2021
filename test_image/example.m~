@@ -1,0 +1,12 @@
+spine = double(imresize(imread('spine.tif'), [256, 256]));
+theta = 0:1:179;
+ProbOptions = PRset('phantomImage', spine, ...
+    'CTtype', 'fancurved', ...
+    'angles', theta);
+[A, b_true, x_true, ProbInfo] = PRtomo(ProbOptions);
+[b, NoiseInfo] = PRnoise(b_true);
+PRshowb(b, ProbInfo)
+PRshowx(x_true,ProbInfo)
+x = IRcgls(A,b);
+PRshowx(x, ProbInfo)
+CGLSoptions = IRS

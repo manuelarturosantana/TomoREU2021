@@ -1,0 +1,40 @@
+
+
+% set up
+spine = double(imresize(imread('spine.tif'), [256, 256]));
+theta = 0:1:179;
+ProbOptions = PRset('phantomImage', spine, ...
+    'CTtype', 'fancurved', ...
+    'angles', theta);
+[A, b_true, x_true, ProbInfo] = PRtomo(ProbOptions);
+[b, NoiseInfo] = PRnoise(b_true);
+PRshowb(b, ProbInfo)
+PRshowx(x_true,ProbInfo)
+x = IRcgls(A,b);
+PRshowx(x, ProbInfo)
+
+CGLSotpions = IRcgls('defaults');
+CGLSoptions = IRset(CGLSoptions, 'x_true', x_true);
+[x, IterInfo] = IRcgls(A,b,CGLSoptions);
+
+IterInfo
+IterInfo.BestReg
+
+FS = 18;
+MS = 10;
+LW = 2;
+% plot relative error in each iteration (minimum around 11th iteration)
+figure(2), clf
+axes('FontSize', FS), hold on
+plot(IterInfo.Enrm, 'b-', 'LineWidth', LW)
+xlabel('Iteration')
+ylabel('Relative error')
+plot(IterInfo.BestReg.It, IterInfo.BestReg.Enrm, 'ro',...
+    'MarkerSize', MS, 'LineWidth', LW), hold off
+% plot the best solution
+PRshowx(IterInfo.BestReg.X, ProbInfo)
+
+CGLSoptions2 = IRset(CGLSoptions, 'NoiseLevel', 0.01);
+[x2, IterInfo2] = IRcgls(A,b,CGLSoptions2);
+
+
