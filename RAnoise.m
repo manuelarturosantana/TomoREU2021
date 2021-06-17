@@ -17,7 +17,7 @@ function [A,b,x,ProbInfo] = RAnoise(varargin)
 %
 %   Optional Aurguments
 %   Ntheta: The number of times to change the noise on R and the angles at  
-%       evenly spaced increments of angles. Must divide the numer of angles. 
+%       evenly spaced increments of angles. Must divide the number of angles. 
 %       Default length(inOptions.angles).
 %   Rnoise: The scalaring constant on the amount of noise added to R. 
 %       The amount of noise added is Rnoise * (rand() - 0.5). Default 0.5.
@@ -60,7 +60,7 @@ end
 %passed in.
 switch length(varargin)
     case 2
-        Ntheta = 1;
+        Ntheta = length(inOptions.angles);
         Rnoise = 0.5;
         AngNoise = 0.5;
     case 3
@@ -88,9 +88,10 @@ if round(anglesPerIter) ~= anglesPerIter
 end
 
 for i = 0:Ntheta - 1
-    RN = Rstart + Rnoise * (rand() - 0.5);
+    RN = Rstart + Rnoise * (rand() - 0.5)
+    NoiseyAngle = (rand() - 0.5)
     anglesN = angles((i * anglesPerIter) + 1: (i + 1) * anglesPerIter) + ...
-        AngNoise * (rand() - 0.5);
+        AngNoise * NoiseyAngle;
     options = PRset('CTtype','fancurved','phantomImage', inOptions.phantomImage,...
         'angles',anglesN, 'R', RN);
     [An,bn,xn,ProbInfo] = PRtomo(n,options);
