@@ -46,15 +46,24 @@ function [A,b,x,ProbInfo] = PRtomo_var(n, R, angles, ProbOptions)
 %
 %
 
+
+if isempty(ProbOptions.phantomImage)
+    image = 'sheppLogan';
+else
+    image = ProbOptions.phantomImage;
+end
+
 [~, m] = size(angles);
 if m ~= length(R)
     error('Number columns in ''angles'' must be the same as length of ''R''')
 end
 
-ProbOptions = PRset(ProbOptions, 'R', R(1),'angles',angles(:,1));
+ProbOptions = PRset(ProbOptions, 'R', R(1),'angles',angles(:,1),...
+    'phantomImage', image);
 [A, b, x, ProbInfo] = PRtomo(n, ProbOptions);
 for j = 2:m
-    ProbOptions = PRset(ProbOptions, 'R', R(j),'angles',angles(:,j));
+    ProbOptions = PRset(ProbOptions, 'R', R(j),'angles',angles(:,j),...
+        'phantomImage', image);
     [Aj, bj, ~, ~] = PRtomo(n, ProbOptions);
     A = [A; Aj];
     b = [b; bj];
