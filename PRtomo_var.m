@@ -1,4 +1,6 @@
 function [A,b,x,ProbInfo] = PRtomo_var(n, R, angles, ProbOptions)
+% Writen by Dr. James Nagy
+%
 % PRtomo_var Generates data for X-ray tomographic reconstruction problems
 % with (possibly) variable geometry information
 %
