@@ -1,4 +1,4 @@
-function p = lsqAp_var(n,Rvals,thetaVals,angles,bounds,budget,PRoptions,b,xk)
+function p = lsqAp_var(n,Rvals,thetaVals,angles,bounds,budget,PRoptions,imOptions,b,xk)
 % Nesting function for performing the minimization. of A(p)x_k - b. Performs
 % the optimization using the imfil function and package. 
 %
@@ -17,13 +17,13 @@ function p = lsqAp_var(n,Rvals,thetaVals,angles,bounds,budget,PRoptions,b,xk)
 %      parameters for R, and the second half containing those for theta.
     
     param = [Rvals,thetaVals]';
-    lsOptions = imfil_optset('least_squares',1,'simple_function',1);
     
-    p = imfil(param,@multAndSub,budget,bounds,lsOptions);
+    p = imfil(param,@multAndSub,budget,bounds,imOptions);
+    p = p';
     %This is a nested function so the pass in parameters are avaliable to 
     % it, making it easier to use imfil.
     function vec = multAndSub(x)
-        %Since lsqnonlin only takes a single vector we stack the R's and 
+        %Since imfil only takes a single vector we stack the R's and 
         %theta noise on top of each other on the x. 
         Rparams = x(1:length(x) / 2); 
         thetaParams = x((length(x) / 2) + 1:end);
