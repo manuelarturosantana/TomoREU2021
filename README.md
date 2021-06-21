@@ -17,5 +17,5 @@ For full functionality the following matlab packages and toolboxes should be ins
 The GITHUB repository consists of 4 main folders:
 1. [test_image](test_image) : image to set up test for our algorithm
 2. [test_setup](test_setup) : set up tests
-3. [algorithms](algorithms) : MATLAB functions
+3. [algorithm](algorithm) : MATLAB functions
 4. [test_reslt](test_reslt) : results produced from the test set-up (reconstructed images, relative error norm graphs)
