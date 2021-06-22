@@ -46,7 +46,7 @@ span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage','sheppLogan');
 budget          = 100 * 2 * m;
 func_delt       = 1e-6;
-optIter         = 2;
+optIter         = 10;
 isImfil         = True;
 
 %
@@ -56,9 +56,9 @@ isImfil         = True;
 %
 
 R_LOWER = 0.5 * sqrt(2) + .001;
-R_upper = 3;
-angle_lower = -1;
-angle_upper = 1;
+R_upper = 2.5;
+angle_lower = -.5;
+angle_upper = .5;
 
 
 %
@@ -136,7 +136,7 @@ if isImfil
     ones(1,m) * R_upper ones(1,m) * angle_upper]';
 else %Set up the parameters for the lsqnonlin
     optOptions = optimoptions('lsqnonlin','MaxFunctionEvaluations',budget,...
-        'FunctionTolerance',func_delt);
+        'FunctionTolerance',func_delt, 'UseParallel',true);
     lb = [ones(1,m) * R_LOWER ones(1,m) * angle_lower];
     ub = [ones(1,m) * R_upper ones(1,m) * angle_upper];
     
