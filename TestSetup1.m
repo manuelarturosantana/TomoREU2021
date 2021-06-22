@@ -27,16 +27,16 @@
                 rng(1);
 n               = 64;
 m               = 4;   
-Rnoise          = 0.25;
+Rnoise          = 1;
 Rguess          = 2;   
 Rtrue           = Rguess*ones(1,m) + Rnoise*(rand(1,m) - 0.5);
 angles_guess    = (0:2:358);
-ang_noise_guess = 0.1;
-ang_noise       = 0.5;
+ang_noise_guess = 0;
+ang_noise       = 1;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span);
-optIter         = 10;
+optIter         = 5;
                           
 % Check to make sure p = is an integer  
 if p ~= fix(p)
@@ -85,22 +85,22 @@ title('Solution with Noisey A','fontsize', 20)
 %Now we enter into the BCD loop. First we initialize our guess for the
 %parameters on R and theta.
 %
-Rparams = ones(1,4) * Rguess;
+RParams = ones(1,4) * Rguess;
 thetaParams = ones(1,4) * ang_noise_guess;
 %We use x2 as our first x calculation.
 x_k = x2;
 % Here we collect the error norm for plotting later.
-errors = [norm(x2 - xtrue)/norm(xtrue)];
+errors = [norm(x2 - xtrue) / norm(xtrue)]; 
 
 % This saves the x_k solutions incase the BCD only shows semi-convergence.
-xs = [x_k];
+xs = x_k;
 
 for i = 2:optIter %number of iterations is number of times x_k is computed.
     %
     %Here we perform the non-linear least squares solution using matlab's
     %optimization toolbox.
     %
-    p_0 = lsqAp(n,Rparams,thetaParams,angles_guess,ProbOptions,b,x_k);
+    p_0 = lsqAp(n,RParams,thetaParams,angles_guess,ProbOptions,b,x_k);
     %Here we split in to the optimized solution to then build a better A
     %matrix
     RParams = p_0(1:length(p_0) / 2);
@@ -109,8 +109,8 @@ for i = 2:optIter %number of iterations is number of times x_k is computed.
     A3 = PRtomo_var(n,RParams,Theta_k,ProbOptions);
     %After building A we minimize in the x block coordinate.
     [x_k, info_k] = IRhybrid_lsqr(A3,b);
-    xs = [xs;x_k];
-    errors = [errors,norm(x_k - xtrue) / norm(xtrue)];
+    xs = [xs, x_k];
+    errors = [errors,(norm(x_k - xtrue) / norm(xtrue))];
 end
 
 figure(4), clf

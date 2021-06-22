@@ -27,16 +27,16 @@
                 rng(1);
 n               = 64;
 m               = 4;   
-Rnoise          = 0.25;
+Rnoise          = 1;
 Rguess          = 2;   
 Rtrue           = Rguess*ones(1,m) + Rnoise*(rand(1,m) - 0.5);
 angles_guess    = (0:2:358);
-ang_noise_guess = 0.1;
-ang_noise       = 0.25;
+ang_noise_guess = 0;
+ang_noise       = 1;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span);
-optIter         = 10;
+optIter         = 3;
                           
 % Check to make sure p = is an integer  
 if p ~= fix(p)
@@ -85,7 +85,7 @@ title('Solution with Noisey A','fontsize', 20)
 %Now we enter into the BCD loop. First we initialize our guess for the
 %parameters on R and theta.
 %
-Rparams = ones(1,4) * Rguess;
+RParams = ones(1,4) * Rguess;
 thetaParams = ones(1,4) * ang_noise_guess;
 %We use x2 as our first x calculation.
 x_k = x2;
@@ -125,7 +125,7 @@ imOptions = imfil_optset('least_squares',1,'simple_function',1, ...
 
 for i = 2:optIter
     %Here we perform the non-linear least squares solution using imfil
-    p_0 = lsqAp_var(n,Rparams,thetaParams,angles_guess,bounds, budget,...
+    p_0 = lsqAp_var(n,RParams,thetaParams,angles_guess,bounds, budget,...
     ProbOptions,imOptions,b,x_k);
     %Here we split in to the optimized solution to then build a better A
     %matrix
