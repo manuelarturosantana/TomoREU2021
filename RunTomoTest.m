@@ -1,7 +1,7 @@
 %
-% Let's set up a test problem that has "true" R values slightly 
-% perturbed from our constant guess for R using the matlab optimzer. 
-% Some comments about the first few lines:
+% This script sets up test problem with changes in R and theta. 
+% To run different versions of the problem you just need to change the values
+% in the first few lines. Here are some comments about the variables:
 %  m               = number of times R changes 
 %                   (in PRtomo_var this is also called m, and is the length 
 %                    of vector R, or number of columns in the array angles)
@@ -23,7 +23,15 @@
 %                    the source moves (and hence the geometry parameters
 %                    change). We will make this constant based on the 
 %                    maximum value of Rtrue.
+% budget           = Number of functions calls that the optimization
+%                    function is allowed to call before stopping. Matlab
+%                    uses 100 * 2m by default.
+% func_delt        = A stopping tolerance for the optimization function.
+%                    When the change in function value reaches this
+%                    tolerance the optimization stops.
+% isImfil          = If true uses Imfil, if false uses lsqnonlin.
 % optIter          = The numer of times the BCD loop will run.
+%
                 rng(1);
 n               = 64;
 m               = 4;   
@@ -35,9 +43,30 @@ ang_noise_guess = 0;
 ang_noise       = 1;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
-ProbOptions     = PRset('CTtype', 'fancurved', 'span', span);
-optIter         = 5;
-                          
+ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage','sheppLogan');
+budget          = 100 * 2 * m;
+func_delt       = 1e-6;
+optIter         = 2;
+isImfil         = True;
+
+%
+% Here we set the bounds for the optimization function as a column vector. R_LOWER
+% is set as a constant, as 0.5 * sqrt(2) is the lowest value that PR tomo
+% will allow for R.
+%
+
+R_LOWER = 0.5 * sqrt(2) + .001;
+R_upper = 3;
+angle_lower = -1;
+angle_upper = 1;
+
+
+%
+% From this point on you probably don't need to understand exactly what the
+% code is doing unless you are tying to debug it, just know it runs the bcd
+% loop for the specified number of iterations.
+%
+
 % Check to make sure p = is an integer  
 if p ~= fix(p)
     error('p = Nangles/m needs to be an integer')
@@ -54,6 +83,7 @@ angles_guess = reshape(angles_guess,p,m);
 
 [Atrue, btrue, xtrue, ProbInfo] = PRtomo_var(n, Rtrue, angles_true, ProbOptions);
 b = PRnoise(btrue);
+paramTrue = [Rtrue angle_pert];
 
 %
 % Now setup a similar problem, using the guess for R and guess angles
@@ -90,17 +120,38 @@ angleParams = ones(1,4) * ang_noise_guess;
 %We use x2 as our first x calculation.
 x_k = x2;
 % Here we collect the error norm for plotting later.
-errors = [norm(x2 - xtrue) / norm(xtrue)]; 
+xErrors = [norm(x2 - xtrue)/norm(xtrue)];
+pErrors = [norm(paramTrue - [RParams angleParams])/norm(paramTrue)];
 
 % This saves the x_k solutions incase the BCD only shows semi-convergence.
-xs = x_k;
+xs = [x_k];
 
-for i = 2:optIter %number of iterations is number of times x_k is computed.
-    %
-    %Here we perform the non-linear least squares solution using matlab's
-    %optimization toolbox.
-    %
-    p_0 = lsqAp(n,RParams,angleParams,angles_guess,ProbOptions,b,x_k);
+
+%Here we set the function options depending on which optimization function
+%was decided on being used.
+if isImfil
+    imOptions = imfil_optset('least_squares',1,'simple_function',1, ...
+    'function_delta', func_delt);
+    bounds = [ones(1,m) * R_LOWER ones(1,m)* angle_lower; ...
+    ones(1,m) * R_upper ones(1,m) * angle_upper]';
+else %Set up the parameters for the lsqnonlin
+    optOptions = optimoptions('lsqnonlin','MaxFunctionEvaluations',budget,...
+        'FunctionTolerance',func_delt);
+    lb = [ones(1,m) * R_LOWER ones(1,m) * angle_lower];
+    ub = [ones(1,m) * R_upper ones(1,m) * angle_upper];
+    
+end
+
+%This enters the BCD optimization loop.
+for i = 2:optIter
+    %Here we perform the non-linear least squares solution
+    if isImfil
+        p_0 = lsqAp_var(n,RParams,angleParams,angles_guess,bounds, budget,...
+        ProbOptions,imOptions,b,x_k);
+    else
+        p_0 = lsqAp(n,RParams,angleParams,angles_guess,lb,ub,ProbOptions,...
+            optOptions,b,x_k);
+    end
     %Here we split in to the optimized solution to then build a better A
     %matrix
     RParams = p_0(1:length(p_0) / 2);
@@ -109,16 +160,22 @@ for i = 2:optIter %number of iterations is number of times x_k is computed.
     A3 = PRtomo_var(n,RParams,Theta_k,ProbOptions);
     %After building A we minimize in the x block coordinate.
     [x_k, info_k] = IRhybrid_lsqr(A3,b);
-    xs = [xs, x_k];
-    errors = [errors,(norm(x_k - xtrue) / norm(xtrue))];
+    xs = [xs,x_k];
+    xErrors = [xErrors,norm(x_k - xtrue) / norm(xtrue)];
+    pErrors = [pErrors,norm(paramTrue - p_0)/norm(paramTrue)];
 end
 
 figure(4), clf
 PRshowx(x_k,ProbInfo)
-title('Solution After BCD (matlab opt)','fontsize', 20)
+if isImfil
+    title('Solution After BCD (Imfil)','fontsize', 20)
+else 
+    title('Solution After BCD (lsqnonlin)','fontsize', 20)
+end
 
 figure(5), clf
-plot(errors)
-legend('errorNorm')
-
-
+plot(xErrors)
+hold on 
+plot(pErrors)
+hold off
+legend('xError Norms','p Error Norms');

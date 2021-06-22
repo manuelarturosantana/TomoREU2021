@@ -1,4 +1,4 @@
-function p = lsqAp(n,Rparam,thetaParam,angles,PRoptions,b,xk)
+function p = lsqAp(n,Rparam,thetaParam,angles,lb,ub,PRoptions,optOptions,b,xk)
 %Nesting function for performing the minimization. of A(p)x_k - b
 % using the matlab optimization toolbox function lsqnonlin.
 %
@@ -17,7 +17,7 @@ function p = lsqAp(n,Rparam,thetaParam,angles,PRoptions,b,xk)
 %      parameters.
     param = [Rparam,thetaParam];
     
-    p = lsqnonlin(@multAndSub,param);
+    p = lsqnonlin(@multAndSub,param,lb,ub,optOptions);
     %This is a nested function so the pass in parameters are avaliable to 
     % it, but it only takes on parameter for the lsnonlin.
     function vec = multAndSub(x)

@@ -86,7 +86,7 @@ title('Solution with Noisey A','fontsize', 20)
 %parameters on R and theta.
 %
 RParams = ones(1,4) * Rguess;
-thetaParams = ones(1,4) * ang_noise_guess;
+angleParams = ones(1,4) * ang_noise_guess;
 %We use x2 as our first x calculation.
 x_k = x2;
 % Here we collect the error norm for plotting later.
@@ -104,10 +104,10 @@ xs = [x_k];
 
 R_LOWER = 0.5 * sqrt(2) + .001;
 R_upper = 3;
-theta_lower = -1;
-theta_upper = 1;
-bounds = [ones(1,m) * R_LOWER ones(1,m)* theta_lower; ...
-    ones(1,m) * R_upper ones(1,m) * theta_upper]';
+angle_lower = -1;
+angle_upper = 1;
+bounds = [ones(1,m) * R_LOWER ones(1,m)* angle_lower; ...
+    ones(1,m) * R_upper ones(1,m) * angle_upper]';
 
 %
 % In this case the budget is the number of funciton evaluations. Default in
@@ -125,13 +125,13 @@ imOptions = imfil_optset('least_squares',1,'simple_function',1, ...
 
 for i = 2:optIter
     %Here we perform the non-linear least squares solution using imfil
-    p_0 = lsqAp_var(n,RParams,thetaParams,angles_guess,bounds, budget,...
+    p_0 = lsqAp_var(n,RParams,angleParams,angles_guess,bounds, budget,...
     ProbOptions,imOptions,b,x_k);
     %Here we split in to the optimized solution to then build a better A
     %matrix
     RParams = p_0(1:length(p_0) / 2);
-    thetaParams = p_0((length(p_0) / 2) + 1:end);
-    Theta_k = angles_true + thetaParams;
+    angleParams = p_0((length(p_0) / 2) + 1:end);
+    Theta_k = angles_true + angleParams;
     A3 = PRtomo_var(n,RParams,Theta_k,ProbOptions);
     %After building A we minimize in the x block coordinate.
     [x_k, info_k] = IRhybrid_lsqr(A3,b);
