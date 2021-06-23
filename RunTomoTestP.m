@@ -46,7 +46,7 @@ span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage','sheppLogan');
 budget          = 100 * 2 * m;
 func_delt       = 1e-6;
-optIter         = 3;
+optIter         = 10;
 isImfil         = false;
 
 %
@@ -136,7 +136,7 @@ if isImfil
     ones(1,m) * R_upper ones(1,m) * angle_upper]';
 else %Set up the parameters for the lsqnonlin
     optOptions = optimoptions('lsqnonlin','MaxFunctionEvaluations',budget,...
-        'FunctionTolerance',func_delt, 'UseParallel',true);
+        'FunctionTolerance',func_delt, 'UseParallel',false);
     lb = [ones(1,m) * R_LOWER ones(1,m) * angle_lower];
     ub = [ones(1,m) * R_upper ones(1,m) * angle_upper];
     
@@ -149,8 +149,8 @@ for i = 2:optIter
         p_0 = lsqAp_var(n,RParams,angleParams,angles_guess,bounds, budget,...
         ProbOptions,imOptions,b,x_k);
     else
-        p_0 = lsqAp(n,RParams,angleParams,angles_guess,lb,ub,ProbOptions,...
-            optOptions,b,x_k);
+        p_0 = optParamParallel(n,RParams,angleParams,angles_guess,lb,ub, ...
+            ProbOptions,optOptions,b,x_k);
     end
     %Here we split in to the optimized solution to then build a better A
     %matrix
