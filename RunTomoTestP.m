@@ -37,20 +37,20 @@
                 rng(5);
 n               = 64;
 m               = 4;   
-Rnoise          = .75;
+Rnoise          = 0.5;
 Rnoise_guess    = 0;
 Rguess          = 2;
 RPert           = Rnoise*(rand(1,m) - 0.5);
 Rtrue           = Rguess*ones(1,m) + RPert;
 angles_guess    = (0:2:358);
 ang_noise_guess = 0;
-ang_noise       = .75;
+ang_noise       = 0.5;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage','sheppLogan');
 budget          = 100 * 2 * m;
 func_delt       = 1e-6;
-optIter         = 25;
+optIter         = 15;
 isImfil         = true;
 
 %
@@ -59,10 +59,10 @@ isImfil         = true;
 % will allow for R.
 %
 
-R_LOWER = -0.5;
-R_upper = 0.5;
-angle_lower = -0.5;
-angle_upper = 0.5;
+R_LOWER = -0.25;
+R_upper = 0.25;
+angle_lower = -0.25;
+angle_upper = 0.25;
 
 
 %
