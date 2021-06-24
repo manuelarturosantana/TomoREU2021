@@ -1,6 +1,6 @@
-function paramVec = optParamParallel(n,RParams,angleParams,angles,lb,ub,PRoptions,optOptions,b,xk,Rstart)
-% optParamParallel: Wrapper function to perform nonlinear least squares
-%                   function using lsqnonlin.
+function paramVec = optParamParallel_var(n,RParams,angleParams,angles,bounds,budget,PRoptions,optOptions,b,xk,Rstart)
+% optParamParallel Wrapper function to perform the nonlinear optimization
+% problem in parallel using imfil.
 %   Inputs: 
 %         n           : The size of one part of the image being tested.
 %         RParams     : Current guess for the R parameters.
@@ -8,13 +8,13 @@ function paramVec = optParamParallel(n,RParams,angleParams,angles,lb,ub,PRoption
 %         angles      : The initial guess angles. Should be in a form such that
 %                     there are length(RParams) columns, and each column 
 %                     corresponds to the the angles for that parameter.
-%         lb          : Same as lb in lsqnonlin.
-%         ub          : Same as ub in lsqnonlin.
+%         bounds      : Same as bounds for imfil.
+%         budget      : Same as budget for imfil.
 %         PRoptions   : Options for PRtomo
 %         optOptions  : Options for lsqnonlin
 %         b           : Right hand side vector
 %         xk          : Current guess for the x vector.
-%         Rstart      : Value to which the R params are added.
+%         Rstart      : R value to add R params to.
 %
 %    Output:
 %         paramVec    : A vector wit the optimized R parameters in the first
@@ -30,15 +30,17 @@ function paramVec = optParamParallel(n,RParams,angleParams,angles,lb,ub,PRoption
     Rvals = zeros(1,m);
     angleVals = zeros(1,m);
     
-    % This reshape makes two columns each with the first m items.
-    lb = reshape(lb,m,2);
-    ub = reshape(ub,m,2);
+    %This reassignment is to prevent broadcasting in the parfor loop.
+    Rbounds = bounds(1:m,:);
+    angleBounds = bounds(1 + m:end,:);
     parfor i = 1:m
-        x = lsqAp(n,RParams(i),angleParams(i),angles(:,i),lb(i,:),ub(i,:),...
-            PRoptions,optOptions,b(:,i),xk,Rstart);
+        probBounds = [Rbounds(i,:); angleBounds(i,:)];
+        x = lsqAp_var(n,RParams(i),angleParams(i),angles(:,i),probBounds,...
+            budget,PRoptions,optOptions,b(:,i),xk,Rstart);
         Rvals(i) = x(1);
         angleVals(i) = x(2);
     end
     paramVec = [Rvals,angleVals];
 end
+
 

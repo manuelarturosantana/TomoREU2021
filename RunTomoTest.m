@@ -46,7 +46,7 @@ span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage','sheppLogan');
 budget          = 100 * 2 * m;
 func_delt       = 1e-6;
-optIter         = 3;
+optIter         = 10;
 isImfil         = false;
 
 %
