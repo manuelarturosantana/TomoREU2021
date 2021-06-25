@@ -24,17 +24,17 @@
                 rng(5);
 n                = 64;
 m                = 4;
-noise_scale      = 0.5;
+noise_scale      = 1;
 noise_guess      = 0;
 perturbations    = noise_scale * (rand(1,m) - 0.5);
 Rguess           = 2;
 angles_guess     = (0:2:358);
 p                = length(angles_guess)/m; 
 ProbOptions      = PRset('CTtype', 'fancurved','phantomImage','sheppLogan');
-optIter          = 10;
+optIter          = 40;
 lb              = -0.5;
 ub              = 0.5;
-isR             = true;
+isR             = false;
 
 
 %

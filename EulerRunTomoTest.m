@@ -1,3 +1,4 @@
+tic
 %
 % This script sets up test problem with changes in R and theta. 
 % To run different versions of the problem you just need to change the values
@@ -34,24 +35,27 @@
 % isImfil          = If true uses Imfil, if false uses lsqnonlin.
 % optIter          = The numer of times the BCD loop will run.
 %
-                rng(5);
+                
+randomSeed      = 5; rng(randomSeed);
 n               = 64;
 m               = 4;   
-Rnoise          = .75;
+Rnoise          = 0.25;
 Rnoise_guess    = 0;
 Rguess          = 2;
 RPert           = Rnoise*(rand(1,m) - 0.5);
 Rtrue           = Rguess*ones(1,m) + RPert;
 angles_guess    = (0:2:358);
 ang_noise_guess = 0;
-ang_noise       = .75;
+ang_noise       = 0.25;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage','sheppLogan');
 budget          = 100 * 2 * m;
 func_delt       = 1e-6;
 optIter         = 2;
-isImfil         = false;
+isImfil         = true;
+
+
 
 %
 % Here we set the bounds for the optimization function as a column vector. R_LOWER
@@ -64,6 +68,14 @@ R_upper = 0.5;
 angle_lower = -0.5;
 angle_upper = 0.5;
 
+% Structure containing all parameters for information and reproducibility of
+% the run.
+runInputs = struct('randomSeed',randomSeed,'n',n,'m',m,'Rnoise',Rnoise,...
+    'Rnoise_guess',Rnoise_guess,'Rguess',Rguess,'Rtrue',Rtrue,...
+    'angles_guess',angles_guess,'ang_noise_guess',ang_noise_guess,'ang_noise',...
+    ang_noise,'p',p,'span',span,'ProbOptions',ProbOptions,'budget',budget,'func_delt',...
+    func_delt,'optIter',optIter,'R_LOWER',R_lower,...
+    'R_upper',R_upper,'angle_lower',angle_lower,'angle_upper',angle_upper);
 
 %
 % From this point on you probably don't need to understand exactly what the
@@ -110,20 +122,11 @@ paramTrue = [RPert angle_pert];
 % Now solve using IRhybrid_lsqr to see the difference in solutions
 % using the true A and the guess for A
 %
-[x1, info1] = IRhybrid_lsqr(Atrue, b);
-[x2, info2] = IRhybrid_lsqr(A, b);
 
-figure(1), clf
-PRshowx(xtrue, ProbInfo)
-title('True Solution','fontsize', 20)
+IRoptions   = IRset('Iterbar','off');
+[x1, info1] = IRhybrid_lsqr(Atrue, b,IRoptions);
+[x2, info2] = IRhybrid_lsqr(A, b,IRoptions);
 
-figure(2), clf
-PRshowx(x1, ProbInfo)
-title('Solution with True A','fontsize', 20)
-
-figure(3), clf
-PRshowx(x2, ProbInfo)
-title('Solution with Noisey A','fontsize', 20)
 
 %
 %Now we enter into the BCD loop. First we initialize our guess for the
@@ -136,6 +139,8 @@ x_k = x2;
 % Here we collect the error norm for plotting later.
 xErrors = [norm(x2 - xtrue)/norm(xtrue)];
 pErrors = [norm(paramTrue - [RParams angleParams])/norm(paramTrue)];
+RErrors = [norm(RPert - RParams) / norm(RPert)];
+angErrors = [norm(angleParams - angle_pert)/norm(angle_pert)];
 
 % This saves the x_k solutions incase the BCD only shows semi-convergence.
 xs = [x_k];
@@ -150,7 +155,7 @@ if isImfil
     ones(1,m) * R_upper ones(1,m) * angle_upper]';
 else %Set up the parameters for the lsqnonlin
     optOptions = optimoptions('lsqnonlin','MaxFunctionEvaluations',budget,...
-        'FunctionTolerance',func_delt, 'UseParallel',true);
+        'FunctionTolerance',func_delt, 'UseParallel',false);
     lb = [ones(1,m) * R_lower ones(1,m) * angle_lower];
     ub = [ones(1,m) * R_upper ones(1,m) * angle_upper];
     
@@ -160,10 +165,10 @@ end
 for i = 2:optIter
     %Here we perform the non-linear least squares solution
     if isImfil
-        p_0 = lsqAp_var(n,RParams,angleParams,angles_guess,...
+        p_0 = optParamParallel_var(n,RParams,angleParams,angles_guess,...
             bounds, budget,ProbOptions,imOptions,b,x_k,Rguess);
     else
-        p_0 = lsqAp(n,RParams,angleParams,angles_guess,lb,ub, ...
+        p_0 = optParamParallel(n,RParams,angleParams,angles_guess,lb,ub, ...
             ProbOptions,optOptions,b,x_k,Rguess);
     end
     %Here we split in to the optimized solution to then build a better A
@@ -171,30 +176,21 @@ for i = 2:optIter
     RParams = p_0(1:length(p_0) / 2);
     Rvals = ones(1,m) * Rguess + RParams;
     angleParams = p_0((length(p_0) / 2) + 1:end);
-    Theta_k = angles_true + angleParams;
+    Theta_k = angles_guess + angleParams;
     [A3,~,~,~] = PRtomo_var(n,Rvals,Theta_k,ProbOptions);
     %After building A we minimize in the x block coordinate.
-    [x_k, info_k] = IRhybrid_lsqr(A3,b);
+    [x_k, info_k] = IRhybrid_lsqr(A3,b,IRoptions);
     xs = [xs,x_k];
     xErrors = [xErrors,norm(x_k - xtrue) / norm(xtrue)];
     pErrors = [pErrors,norm(paramTrue - p_0)/norm(paramTrue)];
+    RErrors = [RErrors,norm(RPert - RParams) / norm(RPert)];
+    angErrors = [angErrors,norm(angleParams - angle_pert)/norm(angle_pert)];
     disp(i)
     disp(p_0)
 end
 
-figure(4), clf
-PRshowx(x_k,ProbInfo)
-if isImfil
-    title('Solution After BCD (Imfil)','fontsize', 20)
-else 
-    title('Solution After BCD (lsqnonlin)','fontsize', 20)
-end
+toc
+save RunTomo1 runInputs RParams angleParams p_0 x_k xErrors pErrors RErrors ...
+    angErrors xs angle_pert RPert paramTrue x1 x2 xtrue isImfil
 
-figure(5), clf
-plot(xErrors);
-hold on 
-plot(pErrors);
-hold off
-legend('xError Norms','p Error Norms');
-xlabel('Number of Iterations','fontsize',15);
-ylabel('Relative error','fontsize',15);
+

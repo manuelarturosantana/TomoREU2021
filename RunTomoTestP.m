@@ -59,7 +59,7 @@ isImfil         = true;
 % will allow for R.
 %
 
-R_LOWER = -0.5;
+R_lower = -0.5;
 R_upper = 0.5;
 angle_lower = -0.5;
 angle_upper = 0.5;
@@ -148,12 +148,12 @@ xs = [x_k];
 if isImfil
     imOptions = imfil_optset('least_squares',1,'simple_function',1, ...
     'function_delta', func_delt);
-    bounds = [ones(1,m) * R_LOWER ones(1,m)* angle_lower; ...
+    bounds = [ones(1,m) * R_lower ones(1,m)* angle_lower; ...
     ones(1,m) * R_upper ones(1,m) * angle_upper]';
 else %Set up the parameters for the lsqnonlin
     optOptions = optimoptions('lsqnonlin','MaxFunctionEvaluations',budget,...
         'FunctionTolerance',func_delt, 'UseParallel',false);
-    lb = [ones(1,m) * R_LOWER ones(1,m) * angle_lower];
+    lb = [ones(1,m) * R_lower ones(1,m) * angle_lower];
     ub = [ones(1,m) * R_upper ones(1,m) * angle_upper];
     
 end
