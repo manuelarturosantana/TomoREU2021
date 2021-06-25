@@ -1,39 +1,26 @@
 %
-% This script sets up test problem with changes in R and theta. 
+% This script sets up test problem with changes in R or Theta.
 % To run different versions of the problem you just need to change the values
 % in the first few lines. Here are some comments about the variables:
 %  m               = number of times R changes 
-%                   (in PRtomo_var this is also called m, and is the length 
-%                    of vector R, or number of columns in the array angles)
-%  Rguess          = guess that R is always equal to this value for all angles
-%  Rtrue           = true values of R, which may be slight perturbations of Rguess
-%  Rnoise          = scalar constant on the amount of perturbation added to Rguess
-%  Rnoise_guess    = The intial guess for Rnoise.
-%  Rpert           = A vector containing the actual perterbations on R.
-%  ang_noise_guess = The initial guess for the angles parameter used in the
-%                    BCD.
-%  ang_noise       = scalar constant on the amount of perturbation added to
-%                    ang_true
-%  ang_guess       = The guess of what the projection angles are.
-%  angles_true     = true projection angles, a slight perturpation of
-%                    ang_guess.
+% noise_scale      = the value to scale the amount of uniform random noise
+%                    from the interval [-0.5,0.5];
+% noise_guess      = guess on the intial amount of noise. Can be a scalar
+%                    or 1 X m vector. It is only used for the inital
+%                    parameter error.
+% perturbations    = The the actual perturbations.
+% Rguess           = The inital guess for R. Used as true R if not testing
+%                    R.
+% angles_guess     = The initial guess angles. Used as the true angles if
+%                    not testing the angles.
 %  p               = [total number of projection angles]/m, should be an 
 %                    integer (see also PRtomo_var, where p is the number of
 %                    rows in the array angles)
-%  span            = scalar that determines the angular span of the rays, in 
-%                    degrees. I think this should be constant, even if the
-%                    the source moves (and hence the geometry parameters
-%                    change). We will make this constant based on the 
-%                    maximum value of Rtrue.
-% budget           = Number of functions calls that the optimization
-%                    function is allowed to call before stopping. Matlab
-%                    uses 100 * 2m by default.
-% func_delt        = A stopping tolerance for the optimization function.
-%                    When the change in function value reaches this
-%                    tolerance the optimization stops.
-% isImfil          = If true uses Imfil, if false uses lsqnonlin.
-% optIter          = The numer of times the BCD loop will run.
-%
+% optIter          = The number of times the BCD loop will run.
+% lb,ub            = Lower and upper bounds on the amount size of
+%                    perturbations during the optimization.
+% isR              = Set to True if testing R values, false if testing theta
+%                    values
                 rng(5);
 n                = 64;
 m                = 4;
@@ -59,8 +46,7 @@ isR             = true;
 %      xs       : Contains the solution vector x at each iteration as 
 %                 a column vector.
 %      x_k      : The final solution vector.
-%      paramTrue: A vector with the true R parameter followed by the true
-%                 theta parameters.
+%      paramTrue: A vector with the true perturbations
 %      p_0      : The final parameter estimation vector
 %      xErrors  : The relative error of the x vector at each iteration
 %      pErrors  : The relative error of the parameter vector at each
@@ -71,6 +57,12 @@ if p ~= fix(p)
     error('p = Nangles/m needs to be an integer')
 end
 
+
+%
+% If p is an integer, reshape the angles into the right form for
+% PRtomo_var. Then add perturbations to the appropriate parameter to create
+% a true value different than the guess.
+%
 angles_guess = reshape(angles_guess,p,m);
 angles_true = angles_guess;
 Rtrue = Rguess * ones(1,m);
@@ -81,13 +73,9 @@ else
 end
 span             = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions.span = span;
-%
-% if p is an integer, reshape true and guess vector angles into an array 
-% with p rows and m columns, each column corresponds to an entry in vector 
-% R. Additionally add the noise to each column of the true angles.
-%
 
 
+% Set up the true values problem.
 [Atrue, btrue, xtrue, ProbInfo] = PRtomo_var(n, Rtrue, angles_true, ProbOptions);
 b = PRnoise(btrue);
 
@@ -150,6 +138,11 @@ for i = 2:optIter
     disp(i)
     disp(p_0)
 end
+
+
+%
+% Plot the best x approximation, as well as the error norms.
+%
 
 figure(4), clf
 PRshowx(x_k,ProbInfo)
