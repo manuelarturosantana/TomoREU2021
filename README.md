@@ -10,6 +10,7 @@ The research team, led by Dr. James Nagy from Emory's Mathematics Department, co
 In this project, we aim to use computational method to develop a numerical method to jointly estimate the geometry parameters of the portable CT scan device and to reconstruct the image.
 
 For full functionality the following matlab packages and toolboxes should be installed.
+* [Matlab Parallel Computing Toolbox](https://www.mathworks.com/products/parallel-computing.html)
 * [Matlab Optmization Toolbox](https://www.mathworks.com/products/optimization.html)
 * [IRtools](https://github.com/jnagy1/IRtools)
 * [Imfill](https://ctk.math.ncsu.edu/imfil.html)
