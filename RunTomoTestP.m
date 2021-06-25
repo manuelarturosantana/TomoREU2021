@@ -129,8 +129,8 @@ title('Solution with Noisey A','fontsize', 20)
 %Now we enter into the BCD loop. First we initialize our guess for the
 %parameters on R and theta.
 %
-RParams = ones(1,4) * Rnoise_guess;
-angleParams = ones(1,4) * ang_noise_guess;
+RParams = ones(1,m) * Rnoise_guess;
+angleParams = ones(1,m) * ang_noise_guess;
 %We use x2 as our first x calculation.
 x_k = x2;
 % Here we collect the error norm for plotting later.

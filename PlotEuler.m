@@ -11,25 +11,26 @@
 % pErrors  : Relative errors of p at each iteration.
 % RErrors  : Relative errors of R parameters at each iteration.
 % angErrors: Relative errors of the angles at each iteration.
+% ProbInfo : Problem information from PRtomo for plotting.
 
 filename = input("Please input filename as a string or variable: ");
 
 results = load(filename);
 
 figure(1), clf
-PRshowx(results.xtrue, ProbInfo)
+PRshowx(results.xtrue, results.ProbInfo)
 title('True Solution','fontsize', 20)
 
 figure(2), clf
-PRshowx(results.x1, ProbInfo)
+PRshowx(results.x1,  results.ProbInfo)
 title('Solution with True A','fontsize', 20)
 
 figure(3), clf
-PRshowx(results.x2, ProbInfo)
+PRshowx(results.x2,  results.ProbInfo)
 title('Solution with Noisey A','fontsize', 20)
 
 figure(4), clf
-PRshowx(results.x_k,ProbInfo)
+PRshowx(results.x_k, results.ProbInfo)
 if results.isImfil
     title('Solution After BCD (Imfil)','fontsize', 20)
 else 

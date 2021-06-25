@@ -38,15 +38,15 @@ tic
                 
 randomSeed      = 5; rng(randomSeed);
 n               = 64;
-m               = 4;   
-Rnoise          = 0.25;
+m               = 4;
+Rnoise          = 0.5;
 Rnoise_guess    = 0;
 Rguess          = 2;
 RPert           = Rnoise*(rand(1,m) - 0.5);
 Rtrue           = Rguess*ones(1,m) + RPert;
 angles_guess    = (0:2:358);
 ang_noise_guess = 0;
-ang_noise       = 0.25;
+ang_noise       = 0.5;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage','sheppLogan');
@@ -132,8 +132,8 @@ IRoptions   = IRset('Iterbar','off');
 %Now we enter into the BCD loop. First we initialize our guess for the
 %parameters on R and theta.
 %
-RParams = ones(1,4) * Rnoise_guess;
-angleParams = ones(1,4) * ang_noise_guess;
+RParams = ones(1,m) * Rnoise_guess;
+angleParams = ones(1,m) * ang_noise_guess;
 %We use x2 as our first x calculation.
 x_k = x2;
 % Here we collect the error norm for plotting later.
@@ -186,11 +186,10 @@ for i = 2:optIter
     RErrors = [RErrors,norm(RPert - RParams) / norm(RPert)];
     angErrors = [angErrors,norm(angleParams - angle_pert)/norm(angle_pert)];
     disp(i)
-    disp(p_0)
 end
 
 toc
 save RunTomo1 runInputs RParams angleParams p_0 x_k xErrors pErrors RErrors ...
-    angErrors xs angle_pert RPert paramTrue x1 x2 xtrue isImfil
+    angErrors xs angle_pert RPert paramTrue x1 x2 xtrue isImfil ProbInfo
 
 
