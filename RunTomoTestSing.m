@@ -35,34 +35,19 @@
 % optIter          = The numer of times the BCD loop will run.
 %
                 rng(5);
-n               = 64;
-m               = 4;   
-Rnoise          = 0.1;
-Rnoise_guess    = 0;
-Rguess          = 2;
-RPert           = Rnoise*(rand(1,m) - 0.5);
-Rtrue           = Rguess*ones(1,m) + RPert;
-angles_guess    = (0:2:358);
-ang_noise_guess = 0;
-ang_noise       = 0.1;
-p               = length(angles_guess)/m; 
-span            = 2*atand(1/(2*max(Rtrue)-1));
-ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage','sheppLogan');
-budget          = 100 * 2 * m;
-func_delt       = 1e-6;
-optIter         = 20;
-isImfil         = true;
-
-%
-% Here we set the bounds for the optimization function as a column vector. R_LOWER
-% is set as a constant, as 0.5 * sqrt(2) is the lowest value that PR tomo
-% will allow for R.
-%
-
-R_LOWER = -0.5;
-R_upper = 0.5;
-angle_lower = -0.5;
-angle_upper = 0.5;
+n                = 64;
+m                = 4;
+noise_scale      = 0.5;
+noise_guess      = 0;
+perturbations    = noise_scale * (rand(1,m) - 0.5);
+Rguess           = 2;
+angles_guess     = (0:2:358);
+p                = length(angles_guess)/m; 
+ProbOptions      = PRset('CTtype', 'fancurved','phantomImage','sheppLogan');
+optIter          = 10;
+lb              = -0.5;
+ub              = 0.5;
+isR             = true;
 
 
 %
@@ -85,19 +70,28 @@ angle_upper = 0.5;
 if p ~= fix(p)
     error('p = Nangles/m needs to be an integer')
 end
+
+angles_guess = reshape(angles_guess,p,m);
+angles_true = angles_guess;
+Rtrue = Rguess * ones(1,m);
+if isR
+    Rtrue = Rtrue + perturbations;
+else
+    angles_true  = angles_true + perturbations;
+end
+span             = 2*atand(1/(2*max(Rtrue)-1));
+ProbOptions.span = span;
 %
 % if p is an integer, reshape true and guess vector angles into an array 
 % with p rows and m columns, each column corresponds to an entry in vector 
 % R. Additionally add the noise to each column of the true angles.
 %
-angles_true = angles_guess;
-angle_pert = ang_noise * (rand(1,m) - 0.5);
-angles_true  = reshape(angles_true, p, m) + angle_pert;
-angles_guess = reshape(angles_guess,p,m);
+
 
 [Atrue, btrue, xtrue, ProbInfo] = PRtomo_var(n, Rtrue, angles_true, ProbOptions);
 b = PRnoise(btrue);
-paramTrue = [RPert angle_pert];
+
+paramTrue = perturbations;
 
 %
 % Now setup a similar problem, using the guess for R and guess angles
@@ -125,82 +119,51 @@ figure(3), clf
 PRshowx(x2, ProbInfo)
 title('Solution with Noisey A','fontsize', 20)
 
-%
-%Now we enter into the BCD loop. First we initialize our guess for the
-%parameters on R and theta.
-%
-RParams = ones(1,4) * Rnoise_guess;
-angleParams = ones(1,4) * ang_noise_guess;
-%We use x2 as our first x calculation.
+
+% Now we enter the BCD loop using x2 as our first x calculation.
 x_k = x2;
 % Here we collect the error norm for plotting later.
 xErrors = [norm(x2 - xtrue)/norm(xtrue)];
-pErrors = [norm(paramTrue - [RParams angleParams])/norm(paramTrue)];
-RErrors = [norm(RPert - RParams) / norm(RPert)];
-angErrors = [norm(angleParams - angle_pert)/norm(angle_pert)];
+pErrors = [abs(paramTrue - noise_guess)/abs(paramTrue)];
 
 % This saves the x_k solutions incase the BCD only shows semi-convergence.
 xs = [x_k];
 
 
-%Here we set the function options depending on which optimization function
-%was decided on being used.
-if isImfil
-    imOptions = imfil_optset('least_squares',1,'simple_function',1, ...
-    'function_delta', func_delt);
-    bounds = [ones(1,m) * R_LOWER ones(1,m)* angle_lower; ...
-    ones(1,m) * R_upper ones(1,m) * angle_upper]';
-else %Set up the parameters for the lsqnonlin
-    optOptions = optimoptions('lsqnonlin','MaxFunctionEvaluations',budget,...
-        'FunctionTolerance',func_delt, 'UseParallel',false);
-    lb = [ones(1,m) * R_LOWER ones(1,m) * angle_lower];
-    ub = [ones(1,m) * R_upper ones(1,m) * angle_upper];
-    
-end
-
 %This enters the BCD optimization loop.
 for i = 2:optIter
     %Here we perform the non-linear least squares solution
-    if isImfil
-        p_0 = optParamParallel_var(n,RParams,angleParams,angles_guess,...
-            bounds, budget,ProbOptions,imOptions,b,x_k,Rguess);
-    else
-        p_0 = optParamParallel(n,RParams,angleParams,angles_guess,lb,ub, ...
-            ProbOptions,optOptions,b,x_k,Rguess);
+    p_0 = singOptParallel(n,m,angles_guess,lb,ub,ProbOptions,b,x_k,Rguess,isR);
+    if isR
+        Rvals = ones(1,m) * Rguess + p_0;
+        Theta_k = angles_true;
+    else 
+        Rvals = Rtrue;
+        Theta_k = angles_guess + p_0;
     end
-    %Here we split in to the optimized solution to then build a better A
-    %matrix
-    RParams = p_0(1:length(p_0) / 2);
-    Rvals = ones(1,m) * Rguess + RParams;
-    angleParams = p_0((length(p_0) / 2) + 1:end);
-    Theta_k = angles_guess + angleParams;
     [A3,~,~,~] = PRtomo_var(n,Rvals,Theta_k,ProbOptions);
     %After building A we minimize in the x block coordinate.
     [x_k, info_k] = IRhybrid_lsqr(A3,b);
     xs = [xs,x_k];
     xErrors = [xErrors,norm(x_k - xtrue) / norm(xtrue)];
-    pErrors = [pErrors,norm(paramTrue - p_0)/norm(paramTrue)];
-    RErrors = [RErrors,norm(RPert - RParams) / norm(RPert)];
-    angErrors = [angErrors,norm(angleParams - angle_pert)/norm(angle_pert)];
+    pErrors = [pErrors,abs(paramTrue - p_0)/abs(paramTrue)];
     disp(i)
     disp(p_0)
 end
 
 figure(4), clf
 PRshowx(x_k,ProbInfo)
-if isImfil
-    title('Solution After BCD (Imfil)','fontsize', 20)
+if isR
+    title('Solution After BCD on R','fontsize', 20)
 else 
-    title('Solution After BCD (lsqnonlin)','fontsize', 20)
+    title('Solution After BCD on angles','fontsize', 20)
 end
 
 figure(5), clf
 plot(xErrors,'-o');
 hold on 
 plot(pErrors,'-*');
-plot(RErrors,'-d');
-plot(angErrors,'-^');
 hold off
-legend('xError Norms','p Error Norms', 'R error Norms','Angle Error Norm');
+legend('xError Norms','p Error Norms');
 xlabel('Number of Iterations','fontsize',15);
 ylabel('Relative error','fontsize',15);

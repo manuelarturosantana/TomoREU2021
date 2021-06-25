@@ -1,4 +1,4 @@
-function paramVec = singOptParallel(n,params,angles,lb,ub,PRoptions,b,xk,Rstart,isR)
+function paramVec = singOptParallel(n,m,angles,lb,ub,PRoptions,b,xk,Rstart,isR)
 % singOptParallel Wrapper function to perform the nonlinear optimization
 % problem in parallel for either R or Theta
 %   Inputs: 
@@ -20,7 +20,6 @@ function paramVec = singOptParallel(n,params,angles,lb,ub,PRoptions,b,xk,Rstart,
 %         paramVec    : A vector wit the optimized R parameters in the first
 %                       half, and angle parameters in the second.
     
-    m = length(params);
     %
     %Here we reshape b so that each column contains the correct values of b
     %for each sub problem. The syntax says we want length(b) / m  equally
@@ -31,7 +30,7 @@ function paramVec = singOptParallel(n,params,angles,lb,ub,PRoptions,b,xk,Rstart,
     
     %This reassignment is to prevent broadcasting in the parfor loop.
     parfor i = 1:m
-        paramVec(i) = lsaSing(n,param,angles,lb,ub,PRoptions,b(:,i,...
-            xk,Rstart,isR);
+        paramVec(i) = lsqSing(n,Rstart,angles(:,i),lb,ub,PRoptions,b(:,i),...
+            xk,isR);
     end
 end

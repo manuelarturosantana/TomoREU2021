@@ -1,4 +1,4 @@
-function p = lsqSing(n,param,angles,lb,ub,PRoptions,b,xk,Rstart,isR)
+function p = lsqSing(n,Rstart,angles,lb,ub,PRoptions,b,xk,isR)
 %Nesting function for performing the minimization. of A(p)x_k - b
 % using the fminbd with only one parameter.
 %
@@ -18,12 +18,10 @@ function p = lsqSing(n,param,angles,lb,ub,PRoptions,b,xk,Rstart,isR)
 %
 %      Output:
 %      p: The minimized parameter.
-    
-    
-    p = fminbnd(@multAndSub,param,lb,ub);
+    p = fminbnd(@multAndSub,lb,ub);
     %This is a nested function so the pass in parameters are avaliable to 
     % it, but it only takes on parameter for the fminbnd
-    function vec = multAndSub(x)
+    function paramVal = multAndSub(x)
         %This if/else block allows the function to choose if it is
         % optimizing the R noise or the angle noise.
         if isR
@@ -34,6 +32,7 @@ function p = lsqSing(n,param,angles,lb,ub,PRoptions,b,xk,Rstart,isR)
             angles2 = angles + x;
         end
         Ap = PRtomo_var(n,Rval,angles2,PRoptions);
-        vec = Ap * xk - b;  
+        %To minimize this as a function of one variable we take the norm.
+        paramVal = norm(Ap * xk - b);  
     end
 end
