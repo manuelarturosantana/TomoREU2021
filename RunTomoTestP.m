@@ -37,20 +37,20 @@
                 rng(5);
 n               = 64;
 m               = 4;   
-Rnoise          = 0.5;
+Rnoise          = 0.75;
 Rnoise_guess    = 0;
 Rguess          = 2;
 RPert           = Rnoise*(rand(1,m) - 0.5);
 Rtrue           = Rguess*ones(1,m) + RPert;
 angles_guess    = (0:2:358);
 ang_noise_guess = 0;
-ang_noise       = 0.5;
+ang_noise       = 0.75;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage','sheppLogan');
 budget          = 100 * 2 * m;
 func_delt       = 1e-6;
-optIter         = 15;
+optIter         = 25;
 isImfil         = true;
 
 %
@@ -59,10 +59,10 @@ isImfil         = true;
 % will allow for R.
 %
 
-R_LOWER = -0.25;
-R_upper = 0.25;
-angle_lower = -0.25;
-angle_upper = 0.25;
+R_LOWER = -0.5;
+R_upper = 0.5;
+angle_lower = -0.5;
+angle_upper = 0.5;
 
 
 %
@@ -136,6 +136,8 @@ x_k = x2;
 % Here we collect the error norm for plotting later.
 xErrors = [norm(x2 - xtrue)/norm(xtrue)];
 pErrors = [norm(paramTrue - [RParams angleParams])/norm(paramTrue)];
+RErrors = [norm(RPert - RParams) / norm(RPert)];
+angErrors = [norm(angleParams - angle_pert)/norm(angle_pert)];
 
 % This saves the x_k solutions incase the BCD only shows semi-convergence.
 xs = [x_k];
@@ -178,6 +180,8 @@ for i = 2:optIter
     xs = [xs,x_k];
     xErrors = [xErrors,norm(x_k - xtrue) / norm(xtrue)];
     pErrors = [pErrors,norm(paramTrue - p_0)/norm(paramTrue)];
+    RErrors = [RErrors,norm(RPert - RParams) / norm(RPert)];
+    angErrors = [angErrors,norm(angleParams - angle_pert)/norm(angle_pert)];
     disp(i)
     disp(p_0)
 end
@@ -191,10 +195,12 @@ else
 end
 
 figure(5), clf
-plot(xErrors);
+plot(xErrors,'-o');
 hold on 
-plot(pErrors);
+plot(pErrors,'-*');
+plot(RErrors,'-d');
+plot(angErrors,'-^');
 hold off
-legend('xError Norms','p Error Norms');
+legend('xError Norms','p Error Norms', 'R error Norms','Angle Error Norm');
 xlabel('Number of Iterations','fontsize',15);
 ylabel('Relative error','fontsize',15);
