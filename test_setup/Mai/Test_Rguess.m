@@ -31,13 +31,18 @@
 
 n               = 64;
 m               = 4;   
-Rnoise          = 0.25;
-Rguess          = 2;   
-%Use when adding random noise
-%Rtrue           = Rguess*ones(1,m) + Rnoise*(rand(1,m) - 0.5);
-Rtrue           = Rguess*ones(1,m) + Rnoise*ones(1,m);
+Rnoise          = 0.5;
+Rguess          = 2;
+
+random = false;
+if random
+    Rtrue       = Rguess*ones(1,m) + Rnoise*(rand(1,m) - 0.5);
+else % Add constant noise of Rnoise*0.5 (0.25 in this case) to R
+    Rnoise_new  = Rnoise * 0.5;
+    Rtrue       = Rguess*ones(1,m) + Rnoise_new*ones(1,m);
+end
+
 angles_guess    = (0:2:358);
-ang_noise       = 0.5;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span);
@@ -50,9 +55,10 @@ end
 % if p is an integer, reshape true and guess vector angles into an array 
 % with p rows and m columns, each column corresponds to an entry in vector 
 % R. Additionally add the noise to each column of the true angles.
-%
+% Since we only want to analyze the effect of having random or constant
+% perturbations on R, we will set guessed and true angles equal
+
 angles_true = angles_guess;
-%angle_pert = ang_noise * (rand(1,m) - 0.5);
 angles_true  = reshape(angles_true, p, m);
 angles_guess = reshape(angles_guess,p,m);
 
