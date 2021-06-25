@@ -31,14 +31,16 @@
 
 n               = 64;
 m               = 4;   
-Rnoise          = 0.25;
 Rguess          = 2;   
+% Since we only want to examine the effect of adding random and constant
+% noise to the angles, we will set Rguess and Rtrue equal
 Rtrue           = Rguess*ones(1,m); 
 angles_guess    = (0:2:358);
 ang_noise       = 0.5;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span);
+random          = false;
                           
 % Check to make sure p = is an integer  
 if p ~= fix(p)
@@ -49,12 +51,14 @@ end
 % with p rows and m columns, each column corresponds to an entry in vector 
 % R. Additionally add the noise to each column of the true angles.
 % Note that here, instead of adding random perturbations into the angles, 
-% we will add constant noise of 0.5
-angles_true = angles_guess;
-% Use the 2 lines below if adding random perturbations
-%angle_pert = ang_noise * (rand(1,m) - 0.5);
-%angles_true  = reshape(angles_true, p, m) + angle_pert;
-angles_true  = reshape(angles_true, p, m) + ang_noise;
+% we will add constant noise of 0.25
+if random
+    angle_pert = ang_noise * (rand(1,m) - 0.5);
+    angles_true  = reshape(angles_true, p, m) + angle_pert;
+else
+    angles_true = angles_guess;
+    angles_true = reshape(angles_true, p, m) + ang_noise * 0.5;
+end
 angles_guess = reshape(angles_guess,p,m);
 [Atrue, btrue, xtrue, ProbInfo] = PRtomo_var(n, Rtrue, angles_true, ProbOptions);
 b = PRnoise(btrue);
