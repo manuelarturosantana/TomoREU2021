@@ -2,8 +2,8 @@
 Code written to solve tomographic imaging problems during an REU/RET at Emory University during the summer of 2021.
 
 The research team, led by Dr. James Nagy from Emory's Mathematics Department, consists of 4 student fellows:
-1. Manuel Santana
-2. Mai Phuong Pham Huynh
+1.  Mai Phuong Pham Huynh
+2. Manuel Santana
 3. Issa Susa
 4. Ana Castillo
 
