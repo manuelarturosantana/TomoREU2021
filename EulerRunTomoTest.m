@@ -35,39 +35,45 @@ tic
 % isImfil          = If true uses Imfil, if false uses lsqnonlin.
 % optIter          = The numer of times the BCD loop will run.
 %
-                
-randomSeed      = 4; rng(randomSeed);
+
+
+%These are the basic variables to change for most runs. The advanced
+%parameters are below.
+Rnoise          = 1;
+ang_noise       = 1.5;
+optIter         = 15;
+isImfil         = true;
+% Use the syntax below if you want to use your own image. Change
+% 'spine.tif' to the image you want to use.
+% image           = imresize(double(imread('spine.tif')),[256,256]);
+image           = 'sheppLogan';
+
+% Don't Forget to change the filename at the bottom.
+
+
+
+%Advanced Parameters to change.
+randomSeed      = 5; rng(randomSeed);
 n               = 256;
 m               = 180;
-Rnoise          = 1;
 Rnoise_guess    = 0;
 Rguess          = 2;
 RPert           = Rnoise*(rand(1,m) - 0.5);
 Rtrue           = Rguess*ones(1,m) + RPert;
 angles_guess    = (0:2:358);
 ang_noise_guess = 0;
-ang_noise       = 1;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
-image           = imresize(double(imread('spine.tif')),[256,256]);
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage',image);
 budget          = 100 * 2 * m;
 func_delt       = 1e-6;
-optIter         = 15;
-isImfil         = true;
+R_lower = -0.5 * Rnoise;
+R_upper = 0.5 * Rnoise;
+angle_lower = -0.5 * ang_noise;
+angle_upper = 0.5 * ang_noise;
 
-% In Vim shift g moves to the bottom of the file.
 
-%
-% Here we set the bounds for the optimization function as a column vector. R_LOWER
-% is set as a constant, as 0.5 * sqrt(2) is the lowest value that PR tomo
-% will allow for R.
-%
 
-R_lower = -1.5;
-R_upper = 1.5;
-angle_lower = -0.75;
-angle_upper = 0.75;
 
 % Structure containing all parameters for information and reproducibility of
 % the run.
@@ -194,6 +200,8 @@ for i = 2:optIter
 end
 
 toc
-save SpineRunFull6b runInputs RParams angleParams p_0 x_k xErrors pErrors RErrors angErrors xs angle_pert RPert paramTrue x1 x2 xtrue isImfil ProbInfo
+
+%The first aurgument is the name of the file.
+save test runInputs RParams angleParams p_0 x_k xErrors pErrors RErrors angErrors xs angle_pert RPert paramTrue x1 x2 xtrue isImfil ProbInfo
 
 
