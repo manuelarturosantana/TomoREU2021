@@ -1,4 +1,6 @@
-tic
+function [x_k,x1,xtrue] = parTest(n,isImfil)
+% Stripped down function mean to test timing and nothing else.
+
 %
 % This script sets up test problem with changes in R and theta. 
 % To run different versions of the problem you just need to change the values
@@ -36,27 +38,23 @@ tic
 % optIter          = The numer of times the BCD loop will run.
 %
                 
-randomSeed      = 4; rng(randomSeed);
-n               = 256;
-m               = 180;
-Rnoise          = 1;
+randomSeed      = 5; rng(randomSeed);
+m               = 4;
+Rnoise          = 0.5;
 Rnoise_guess    = 0;
 Rguess          = 2;
 RPert           = Rnoise*(rand(1,m) - 0.5);
 Rtrue           = Rguess*ones(1,m) + RPert;
 angles_guess    = (0:2:358);
 ang_noise_guess = 0;
-ang_noise       = 1;
+ang_noise       = 0.5;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
-image           = imresize(double(imread('spine.tif')),[256,256]);
-ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage',image);
+ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage','sheppLogan');
 budget          = 100 * 2 * m;
 func_delt       = 1e-6;
-optIter         = 15;
-isImfil         = true;
+optIter         = 2;
 
-% In Vim shift g moves to the bottom of the file.
 
 %
 % Here we set the bounds for the optimization function as a column vector. R_LOWER
@@ -64,19 +62,10 @@ isImfil         = true;
 % will allow for R.
 %
 
-R_lower = -1.5;
-R_upper = 1.5;
-angle_lower = -0.75;
-angle_upper = 0.75;
-
-% Structure containing all parameters for information and reproducibility of
-% the run.
-runInputs = struct('randomSeed',randomSeed,'n',n,'m',m,'Rnoise',Rnoise,...
-    'Rnoise_guess',Rnoise_guess,'Rguess',Rguess,'Rtrue',Rtrue,...
-    'angles_guess',angles_guess,'ang_noise_guess',ang_noise_guess,'ang_noise',...
-    ang_noise,'p',p,'span',span,'ProbOptions',ProbOptions,'budget',budget,'func_delt',...
-    func_delt,'optIter',optIter,'R_LOWER',R_lower,...
-    'R_upper',R_upper,'angle_lower',angle_lower,'angle_upper',angle_upper);
+R_lower = -0.5;
+R_upper = 0.5;
+angle_lower = -0.5;
+angle_upper = 0.5;
 
 %
 % From this point on you probably don't need to understand exactly what the
@@ -108,12 +97,9 @@ angle_pert = ang_noise * (rand(1,m) - 0.5);
 angles_true  = reshape(angles_true, p, m) + angle_pert;
 angles_guess = reshape(angles_guess,p,m);
 
-[Atrue, btrue, xtrue, ProbInfo] = PRtomo_var(n, Rtrue, angles_true, ProbOptions);
+[Atrue, btrue, xtrue, ~] = PRtomo_var(n, Rtrue, angles_true, ProbOptions);
 b = PRnoise(btrue);
-paramTrue = [RPert angle_pert];
 
-disp("The size of A is");
-disp(size(Atrue));
 %
 % Now setup a similar problem, using the guess for R and guess angles
 % (note that using PRtomo_var with a scalar input for R and corresponding
@@ -127,8 +113,8 @@ disp(size(Atrue));
 %
 
 IRoptions   = IRset('Iterbar','off');
-[x1, info1] = IRhybrid_lsqr(Atrue, b,IRoptions);
-[x2, info2] = IRhybrid_lsqr(A, b,IRoptions);
+[x1, ~] = IRhybrid_lsqr(Atrue, b,IRoptions);
+[x2, ~] = IRhybrid_lsqr(A, b,IRoptions);
 
 
 %
@@ -139,17 +125,6 @@ RParams = ones(1,m) * Rnoise_guess;
 angleParams = ones(1,m) * ang_noise_guess;
 %We use x2 as our first x calculation.
 x_k = x2;
-% Here we collect the error norm for plotting later.
-xErrors = [norm(x2 - xtrue)/norm(xtrue)];
-disp(length([RParams angleParams]))
-disp(length(paramTrue))
-pErrors = [norm(paramTrue - [RParams angleParams])/norm(paramTrue)];
-RErrors = [norm(RPert - RParams) / norm(RPert)];
-angErrors = [norm(angleParams - angle_pert)/norm(angle_pert)];
-
-% This saves the x_k solutions incase the BCD only shows semi-convergence.
-xs = [x_k];
-
 
 %Here we set the function options depending on which optimization function
 %was decided on being used.
@@ -160,7 +135,7 @@ if isImfil
     ones(1,m) * R_upper ones(1,m) * angle_upper]';
 else %Set up the parameters for the lsqnonlin
     optOptions = optimoptions('lsqnonlin','MaxFunctionEvaluations',budget,...
-        'FunctionTolerance',func_delt, 'UseParallel',false,'Display','off');
+        'FunctionTolerance',func_delt, 'UseParallel',false);
     lb = [ones(1,m) * R_lower ones(1,m) * angle_lower];
     ub = [ones(1,m) * R_upper ones(1,m) * angle_upper];
     
@@ -184,16 +159,5 @@ for i = 2:optIter
     Theta_k = angles_guess + angleParams;
     [A3,~,~,~] = PRtomo_var(n,Rvals,Theta_k,ProbOptions);
     %After building A we minimize in the x block coordinate.
-    [x_k, info_k] = IRhybrid_lsqr(A3,b,IRoptions);
-    xs = [xs,x_k];
-    xErrors = [xErrors,norm(x_k - xtrue) / norm(xtrue)];
-    pErrors = [pErrors,norm(paramTrue - p_0)/norm(paramTrue)];
-    RErrors = [RErrors,norm(RPert - RParams) / norm(RPert)];
-    angErrors = [angErrors,norm(angleParams - angle_pert)/norm(angle_pert)];
-    disp(i)
+    [x_k, ~] = IRhybrid_lsqr(A3,b,IRoptions);
 end
-
-toc
-save SpineRunFull6b runInputs RParams angleParams p_0 x_k xErrors pErrors RErrors angErrors xs angle_pert RPert paramTrue x1 x2 xtrue isImfil ProbInfo
-
-

@@ -38,13 +38,16 @@ else
 end
 
 figure(5), clf
-plot(results.xErrors,'-o');
+plot(results.xErrors,'-o','LineWidth',1.5);
 hold on 
-plot(results.pErrors,'-*');
-plot(results.RErrors,'-d');
-plot(results.angErrors,'-^');
+ax = gca;
+ax.FontSize = 15;
+plot(results.pErrors,'-*','LineWidth',1.5);
+plot(results.RErrors,'-d','LineWidth',1.5);
+plot(results.angErrors,'-^','LineWidth',1.5);
 hold off
-legend('xError Norms','p Error Norms', 'R error Norms','Angle Error Norm');
-xlabel('Number of Iterations','fontsize',15);
-ylabel('Relative error','fontsize',15);
+legend('x Error Norms','p Error Norms', 'R Error Norms','Angle Error Norms','Fontsize',15);
+xlabel('Number of Iterations','Fontsize',20);
+ylabel('Relative Error','Fontsize',20);
+title('Errors at each Iteration','Fontsize',20);
 
