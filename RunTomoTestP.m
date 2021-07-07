@@ -33,30 +33,32 @@
 %                    tolerance the optimization stops.
 % isImfil          = If true uses Imfil, if false uses lsqnonlin.
 % optIter          = The numer of times the BCD loop will run.
+% isImBCD          = If true uses Inexact Majorized BCD, else standard BCD.
 %
                 rng(5);
 n               = 64;
 m               = 4;   
-Rnoise          = 0.25;
+Rnoise          = 0.5;
 Rnoise_guess    = 0;
 Rguess          = 2;
 RPert           = Rnoise*(rand(1,m) - 0.5);
 Rtrue           = Rguess*ones(1,m) + RPert;
 angles_guess    = (0:2:358);
 ang_noise_guess = 0;
-ang_noise       = 0.25;
+ang_noise       = 0.5;
 p               = length(angles_guess)/m; 
 span            = 2*atand(1/(2*max(Rtrue)-1));
-ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage','sheppLogan');
+image           = imresize(double(imread('spine.tif')),[256 256]);
+ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage',image);
 budget          = 100 * 2 * m;
 func_delt       = 1e-6;
-optIter         = 20;
+optIter         = 3;
 isImfil         = true;
+isImBCD         = true;
 
 %
-% Here we set the bounds for the optimization function as a column vector. R_LOWER
-% is set as a constant, as 0.5 * sqrt(2) is the lowest value that PR tomo
-% will allow for R.
+% Here set the bounds for the optimization function to constrain R and the
+% angle perterbation to.
 %
 
 R_lower = -0.5;
@@ -158,6 +160,11 @@ else %Set up the parameters for the lsqnonlin
     
 end
 
+if isImBCD
+    t_old = 1;
+    w_old = [x_k' RParams angleParams];
+end
+
 %This enters the BCD optimization loop.
 for i = 2:optIter
     %Here we perform the non-linear least squares solution
@@ -178,6 +185,21 @@ for i = 2:optIter
     %After building A we minimize in the x block coordinate.
     [x_k, info_k] = IRhybrid_lsqr(A3,b);
     xs = [xs,x_k];
+    
+    if isImBCD
+        %This section begins the inexact majorized BCD part;
+        t_new = 0.5 * (1 + sqrt(1 + 4 * t_old^2));
+        w_new = [x_k' p_0];
+        w_best = w_old + (t_old / t_new)*(w_new - w_old);
+        w_old = w_new;
+        t_old = t_new;
+
+        xkLength = length(x_k);
+        x_k = w_best(1:xkLength)'; %x must be a column vector
+        RParams = w_best(xkLength + 1: xkLength + m); %m is the number of R parameters.
+        angleParams = w_best(xkLength + 1 + m:end);
+    end
+    
     xErrors = [xErrors,norm(x_k - xtrue) / norm(xtrue)];
     pErrors = [pErrors,norm(paramTrue - p_0)/norm(paramTrue)];
     RErrors = [RErrors,norm(RPert - RParams) / norm(RPert)];
@@ -195,11 +217,11 @@ else
 end
 
 figure(5), clf
-plot(xErrors,'-o');
+plot(xErrors,'-o','LineWidth',2);
 hold on 
-plot(pErrors,'-*');
-plot(RErrors,'-d');
-plot(angErrors,'-^');
+plot(pErrors,'-*','LineWidth',2);
+plot(RErrors,'-d','LineWidth',2);
+plot(angErrors,'-^','LineWidth',2);
 hold off
 legend('xError Norms','p Error Norms', 'R error Norms','Angle Error Norm');
 xlabel('Number of Iterations','fontsize',15);
