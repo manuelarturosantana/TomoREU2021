@@ -52,9 +52,9 @@ image           = imresize(double(imread('spine.tif')),[256 256]);
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage',image);
 budget          = 100 * 2 * m;
 func_delt       = 1e-6;
-optIter         = 3;
+optIter         = 7;
 isImfil         = true;
-isImBCD         = true;
+isImBCD         = false;
 
 %
 % Here set the bounds for the optimization function to constrain R and the
@@ -190,7 +190,7 @@ for i = 2:optIter
         %This section begins the inexact majorized BCD part;
         t_new = 0.5 * (1 + sqrt(1 + 4 * t_old^2));
         w_new = [x_k' p_0];
-        w_best = w_old + (t_old / t_new)*(w_new - w_old);
+        w_best = w_new + (t_old / t_new)*(w_new - w_old);
         w_old = w_new;
         t_old = t_new;
 

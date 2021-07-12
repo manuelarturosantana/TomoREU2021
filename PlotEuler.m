@@ -27,7 +27,7 @@ title('Solution with True A','fontsize', 20)
 
 figure(3), clf
 PRshowx(results.x2,  results.ProbInfo)
-title('Solution with Noisey A','fontsize', 20)
+title('Solution with inital Guess Parameters','fontsize', 20)
 
 figure(4), clf
 PRshowx(results.x_k, results.ProbInfo)
