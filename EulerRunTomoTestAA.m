@@ -50,20 +50,21 @@ tic
 %These are the basic variables to change for most runs. The advanced
 %parameters are below.
 Rnoise          = 1;
-ang_noise       = 1.5;
-optIter         = 2;
+ang_noise       = 1;
+optIter         = 20;
 isImfil         = true;
 % Use the syntax below if you want to use your own image. Change
 % 'spine.tif' to the image you want to use.
-% image           = imresize(double(imread('spine.tif')),[256,256]);
-image           = 'sheppLogan';
+ image           = imresize(double(imread('spine.tif')),[256,256]);
+%image           = 'sheppLogan';
+runDescription   = "This is the standard test using Anderson Acceleroation."
 
 % Don't Forget to change the filename at the bottom.
 
 
 
 %Advanced Parameters to change.
-randomSeed      = 5; rng(randomSeed);
+randomSeed      = 4; rng(randomSeed);
 n               = 256;
 m               = 180;
 Rnoise_guess    = 0;
@@ -76,7 +77,7 @@ p               = length(angles_guess)/m;
 span            = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage',image);
 budget          = 100 * 2 * m;
-func_delt       = 1e-6;
+func_delt       = 1e-15;
 R_lower = -0.5 * Rnoise;
 R_upper = 0.5 * Rnoise;
 angle_lower = -0.5 * ang_noise;
@@ -93,7 +94,8 @@ runInputs = struct('randomSeed',randomSeed,'n',n,'m',m,'Rnoise',Rnoise,...
     'angles_guess',angles_guess,'ang_noise_guess',ang_noise_guess,'ang_noise',...
     ang_noise,'p',p,'span',span,'ProbOptions',ProbOptions,'budget',budget,'func_delt',...
     func_delt,'optIter',optIter,'R_LOWER',R_lower,...
-    'R_upper',R_upper,'angle_lower',angle_lower,'angle_upper',angle_upper);
+    'R_upper',R_upper,'angle_lower',angle_lower,'angle_upper',angle_upper,...
+    'runDescription',runDescription);
 
 %
 % From this point on you probably don't need to understand exactly what the
@@ -287,10 +289,11 @@ end
 
 runTime = toc
 p_0 = iterInfo.p_0;
+x2 = x0;
 x_k = x_curr;
 %The first aurgument is the name of the file.
 save test runInputs RParams angleParams runTime p_0 x_k ...
-    xErrors pErrors RErrors angErrors xs angle_pert RPert paramTrue x1 x0 ...
+    xErrors pErrors RErrors angErrors xs angle_pert RPert paramTrue x1 x2 ...
     xtrue isImfil ProbInfo
 
 
