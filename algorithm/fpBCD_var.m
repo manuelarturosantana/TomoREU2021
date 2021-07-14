@@ -1,4 +1,4 @@
-function [x_k, iterInfo] = fpBCD(inputs)
+function [x_k, iterInfo] = fpBCD_var(inputs)
     %This function computes one iteration of the BCD loop, as if it was a
     %fixed point iteration. 
     % inputs: A structure containing the following information.
@@ -50,5 +50,5 @@ function [x_k, iterInfo] = fpBCD(inputs)
     iterInfo.Rvals = Rvals;
     iterInfo.p_0 = p_0;
     iterInfo.angleParams = angleParams;
-   
+    x_k = [x_k; p_0'];
 end

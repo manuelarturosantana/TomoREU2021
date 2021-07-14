@@ -131,8 +131,7 @@ angles_guess = reshape(angles_guess,p,m);
 b = PRnoise(btrue);
 paramTrue = [RPert angle_pert];
 
-disp("The size of A is");
-disp(size(Atrue));
+
 %
 % Now setup a similar problem, using the guess for R and guess angles
 % (note that using PRtomo_var with a scalar input for R and corresponding
@@ -191,8 +190,8 @@ BCDinfo.isImfil = isImfil; BCDinfo.budget = budget; BCDinfo.m = m;
 BCDinfo.IRoptions = IRoptions;
 
 %Intialization for Anderson Acceloration.
-x_curr = x0;
-BCDinfo.x = x_curr;
+x_curr = [x0; RParams'; angleParams'];
+BCDinfo.x = x0;
 G = [ ];
 num_stored_residuals = 0;
 %Number of previous solutions to use with Anderson Acceloration
@@ -200,7 +199,7 @@ num_stored_residuals = 0;
 
 %This enters the AABCD optimization loop.
 for k = 1:optIter
-    [g_curr, iterInfo] = fpBCD(BCDinfo);
+    [g_curr, iterInfo] = fpBCD_var(BCDinfo);
     f_curr = g_curr - x_curr;
     if k > 1
         %Form G on the second iteration.
@@ -276,26 +275,27 @@ for k = 1:optIter
        %updating the x info based on the anderson acceleration.
        x_curr = g_curr - G * gamma;
     end
-    
+
+x_k = x_curr(1:length(x0));
+p_0 = x_curr(length(x0) + 1: end);
+RParams = p_0(1:length(p_0) / 2);
+angleParams = p_0((length(p_0) / 2 + 1):end);
+
 %Update the current x guess in the BCD info.
-BCDinfo.x = x_curr;
-BCDinfo.RParams = iterInfo.RParams;
-BCDinfo.angleParams = iterInfo.angleParams;
+BCDinfo.x = x_k;
+BCDinfo.RParams = RParams;
+BCDinfo.angleParams = angleParams;
 %Store the errors for plotting at each iteration.
-xs = [xs, x_curr];
-xErrors = [xErrors,norm(x_curr - xtrue) / norm(xtrue)];
-pErrors = [pErrors,norm(paramTrue - iterInfo.p_0)/norm(paramTrue)];
-RErrors = [RErrors,norm(RPert - iterInfo.RParams) / norm(RPert)];
-angErrors = [angErrors,norm(iterInfo.angleParams - angle_pert)/norm(angle_pert)];
+xs = [xs, x_k];
+xErrors = [xErrors,norm(x_k - xtrue) / norm(xtrue)];
+pErrors = [pErrors,norm(paramTrue - p_0)/norm(paramTrue)];
+RErrors = [RErrors,norm(RPert - RParams) / norm(RPert)];
+angErrors = [angErrors,norm(angleParams - angle_pert)/norm(angle_pert)];
 end    
 
 runTime = toc
-p_0 = iterInfo.p_0;
 x2 = x0;
-x_k = x_curr;
 %The first aurgument is the name of the file.
 save test runInputs RParams angleParams runTime p_0 x_k ...
     xErrors pErrors RErrors angErrors xs angle_pert RPert paramTrue x1 x2 ...
     xtrue isImfil ProbInfo
-
-
