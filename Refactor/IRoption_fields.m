@@ -99,15 +99,14 @@ allfields = {'x0';
     'discrbilStopTol';
     'regbilStopTol';
     %Newly Added
-    'BCDStopTol';
-    'RBounds';
-    'ThetaBounds';
-    'nonlinSolver';
-    'accel';
-    'BCDtol';
+    'BCDStopTol'; %1e-3
+    'RBounds'; %0.5
+    'angleBounds'; %0.5
+    'nonlinSolver'; %'imfil' or 'nonlinsolver'
+    'accel'; %'anderson''ironstuck',secant,'none'
     'BCDmaxIter'; %This is here so we can pass this function into the solver as well
-    'lsSolver';
+    'BCDlsSolver'; %"gcls","lsqr","fista","irn"
     %Anderson Acceleration Only
-    'numRes';
-    'dropTol';
+    'maxRes'; %'3'
+    'dropTol'; %'1e6'
     };

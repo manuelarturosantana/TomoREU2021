@@ -338,6 +338,25 @@ switch field
     [validvalue, errmsg] = nonNegscalar(field,value);
   case {'regbilStopTol'}% real non-negative scalar
     [validvalue, errmsg] = nonNegscalar(field,value);
+  %New Options---------------------------------------------------------
+  case {'BCDStopTol'} %real non-negative scalar
+    [validvalue,errmsg] = nonNegscalar(field,value);
+  case {'RBounds'} %real non-negative scalar
+    [validvalue,errmsg] = nonNegscalar(field,value);
+  case {'angleBounds'} %real non-negative scalar
+    [validvalue, errmsg] = nonNegscalar(field,value);
+  case {'nonlinSolver'} %nonlin solver name
+    [validvalue, errmsg] = nonlinsolver(field,value);
+  case {'accel'} %accel method name
+    [validvalue,errmsg] = accelmethod(field,value);
+  case {'BCDmaxIter'} %positive integer
+    [validvalue,errmsg] = PosInteger(field,value);
+  case {'BCDlsSolver'} %Damped least squares solver. 
+    [validvalue,errmsg] = lsSolverType(field,value);
+  case {'maxRes'} % positive integer
+    [validvalue,errmsg] = PosInteger(field,value);
+  case {'dropTol'} %real non-negative scalar
+    [validvalue,errmsg] = condNum(field,value); 
   otherwise
     %validfield = false;  
     validvalue = false;
@@ -767,4 +786,37 @@ else
   errmsg = '';
 end
 
+%New functions for BCD parameters
+%--------------------------------------------------------------------
+function [valid, errmsg] = nonlinsolver(field,value)
+valid = (strcmp('imfil',value) || strcmp('lsqnonlin',value));
+if ~valid
+ errmsg = sprintf('Invalid value for OPTIONS parameter %s: must be "imfil", or "lsqnonlin".',field);
+else
+  errmsg = '';
+end
+%--------------------------------------------------------------------
+function [valid, errmsg] = accelmethod(field,value)
+valid = any(strcmpi(value,{'anderson','ironstuck','secant','none'}));
+if ~valid
+ errmsg = sprintf('Invalid value for OPTIONS parameter %s: must be "anderson","ironstuck","secant", or "none".',field);
+else
+  errmsg = '';
+end
+%------------------------------------------------------------------------
+function [valid, errmsg] = lsSolverType(field,value)
+valid = any(strcmpi(value,{'gcls','lsqr','fista','irn'}));
+if ~valid
+ errmsg = sprintf('Invalid value for OPTIONS parameter %s: must be "gcls","lsqr","fista","irn".',field);
+else
+  errmsg = '';
+end
+%-------------------------------------------------------------------------
+function [valid, errmsg] = condNum(field,value)
+valid = isscalar(value) && isreal(value) && value >= 1;
+if ~valid
+ errmsg = sprintf('Invalid value for OPTIONS parameter %s: must be a real value >= 1.',field);
+else
+  errmsg = '';
+end
 

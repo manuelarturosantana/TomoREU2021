@@ -83,10 +83,12 @@ if (nargin == 0) && (nargout == 0)
   fprintf('PRtomo       R            [ positive scalar | {2} ]\n');
   fprintf('PRtomo       span         [ positive scalar | {see documentation} ]\n');
   %New fields-----------------------------------------------------------
-  fprintf('PRtomo_var       anglesvar    [vector of positive scalars | {0:2:358}]\n');
+  %fprintf('PRtomo_var       anglesvar    [vector of positive scalars | {0:2:358}]\n');
+  %not needed. R var decides how this is divided up
   fprintf('PRtomo_var       Rvar         [vector of positive scalars | {[2,2,2,2]}]\n');
   fprintf('PRtomo_var       Rpert        [scalar | {0.5}]\n');
   fprintf('PRtomo_var       anglespert   [scalar | {0.5}]\n');
+  fprintf('PRtomo_var       bnoise       [scalar | {0.1}]\n');
   return
 end
 
@@ -95,7 +97,7 @@ allfields = {'trueImage';'PSF';'BlurLevel';'Frames';'BC';'CommitCrime';...
     'InterpMethod';'phantomImage';'CTtype';'sm';'angles';'p';'R';'d';...
     'span';'numCircles';'wavemodel';'s';'omega';'Tfinal';'Tsteps';...
     'material';'numData';'Tloglimits';'tauloglimits';...
-    'anglesvar';'Rvar';'Rpert';'anglespert'}; %This line is new fields
+    'Rvar';'Rpert';'anglespert';'bnoise'}; %This line is new fields
   
 % Create cell array.
 structinput = cell(2,length(allfields));
@@ -277,14 +279,17 @@ switch field
   case {'tauloglimits'} % numeric vector
     [validvalue, errmsg] = VectLimitType(field,value);
   %New parameters
-  case {'anglesvar'} %numeric vector
-      [validvalue,errmsg] = RealVectorType(field,value);
+  %not needed since Rvar can decide if it is going to work.
+%   case {'anglesvar'} %numeric vector
+%       [validvalue,errmsg] = RealVectorType(field,value);
   case {'Rvar'} %numeric vector
       [validvalue,errmsg] = RealVectorType(field,value);
   case {'anglespert'} %scalar
       [validvalue,errmsg] = scalar(field,value);
   case {'Rpert'} %scalar
       [validvalue,errmsg] = scalar(field,value);
+  case {'bnoise'} %positive scalar
+      [validvalue, errmsg] = positiveScalar(field,value);
   otherwise
     %validfield = false;  
     validvalue = false;
@@ -296,6 +301,7 @@ if validvalue
 else
     error(errmsg)
 end
+
 
 %-----------------------------------------------------------------------
 
