@@ -56,3 +56,12 @@
 %      dropTol - Tolerance to drop a column in the QR factorization is the
 %                condition number of the residual matrix is above dropTol.
 %                [positive scalar | {1e6}]
+%
+% Optimization Parameters
+%     budget - Maximum number of function evaluations that can be used in
+%              evaluating finding the minimum. 
+%              [positive integer | {2 *100 * number of perturbations}]
+%
+%    funcDelt - Value for stopping criterion of size of change in function 
+%               while doing the optimization
+%              [positive scalar | {1e-6}]

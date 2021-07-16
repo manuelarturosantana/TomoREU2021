@@ -109,4 +109,7 @@ allfields = {'x0';
     %Anderson Acceleration Only
     'maxRes'; %'3'
     'dropTol'; %'1e6'
+    %BCD solver parameters
+    'budget'; %200 * numParameters
+    'funcDelt'; %1e-6
     };

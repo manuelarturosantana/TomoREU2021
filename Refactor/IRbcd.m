@@ -1,6 +1,10 @@
-function [x,IterInfo] = IRbcd(b,options,probInfo)
+function [x,iterInfo] = IRbcd(b,iterOptions,probInfo)
     
     
+    %Set up default parameters
+    iterOptions = setIterOptions(iterOptions,probInfo);
+
+
     % The first part of the BCD this function should do is come up with th
     % initial guess, first by generating A
     %[A, ~, ~, ~] = PRtomo_var(n, Rguess, angles_guess(:), ProbOptions);
@@ -48,4 +52,45 @@ function [x,IterInfo] = IRbcd(b,options,probInfo)
 %     end
 
 %Finally, update the iter info and return it.
+end
+
+
+%SubFunction--------------------------------------------------------------
+function options = setIterOptions(iterOptions,probInfo)
+%This function sets the defaults for the iterOptions
+    if isempty(iterOptions.BCDStopTol)
+        iterOptions.BCDStopTol = 1e-3;
+    end
+    if isempty(iterOptions.RBounds)
+        iterOptions.RBounds = 0.5;
+    end
+    if isempty(iterOptions.angleBounds)
+        iterOptions.angleBounds = 0.5;
+    end
+    if isempty(iterOptions.nonlinSolver)
+        iterOptions.nonlinSolver = 'lsqnonlin';
+    end
+    if isempty(iterOptions.accel)
+        iterOptions.accel = 'none';
+    end
+    if isempty(iterOptions.BCDmaxIter)
+        iterOptions.BCDmaxIter = 10;
+    end
+    if isempty(iterOptions.BCDlsSolver)
+        iterOptions.BCDlsSolver = 'lsqr';
+    end
+    if isempty(iterOptions.maxRes)
+        iterOptions.maxRes = 3;
+    end
+    if isempty(iterOptions.dropTol)
+        iterOptions.dropTol = 10e6;
+    end
+    if isempty(iterOptions.budget)
+        %Imfil recommended number function evaluations. 
+        iterOptions.budget = 2 * 100 *length(probInfo.TomoInfo.Rvar);
+    end
+    if isempty(iterOptions.funcDelt)
+        iterOptions.funcDelt = 1e-6;
+    end
+    options = iterOptions;
 end

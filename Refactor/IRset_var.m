@@ -357,6 +357,10 @@ switch field
     [validvalue,errmsg] = PosInteger(field,value);
   case {'dropTol'} %real non-negative scalar
     [validvalue,errmsg] = condNum(field,value); 
+  case {'budget'} %Positive Integer
+    [validvalue,errmsg] = PosInteger(field,value);
+  case {'funcDelt'} %Positive scalar
+    [validvalue, errmsg] = nonNegscalar(field,value);
   otherwise
     %validfield = false;  
     validvalue = false;
