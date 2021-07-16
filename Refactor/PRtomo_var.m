@@ -105,7 +105,7 @@ ProbInfo.true.x = xTrue;
      b = [b; bj];
  end
 ProbParams.bSize = size(b);
-b = PRnoise(ProbOptions.bnoise);
+b = PRnoise(b,ProbOptions.bnoise);
 
 %Save the information needed for PRshowx later
 ProbInfo.ProbParams = ProbParams;

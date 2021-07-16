@@ -1,10 +1,17 @@
-% This is the beginning of the documentation for the new IRset and IRvields
+% This is the beginning of the documentation for the new PRset and IRset
+% function.
 %
-% PRset new options
-% anglesvar NOT NEEDED delete
+% PRset new options 
+%
 % Rvar     -  vector containing the r value for each time the angles are
 % divided in the matrix. The length of Rvar must divide the the length of
 % the angles.
+%
+% NOTE: anglesvar was not added since the length of Rvar determines how
+% many columns the angles are divided into. Therefore the forming of
+% anglesvar is done under the hood. If the user wishes to change the angles
+% they may do so in the normal way for PRset.
+%
 %            [vector of positive scalars | {[2,2,2,2]}]
 % Rpert     -  Scalar multiple on the perturbations on R added as Rpert * (rand() - 0.5)  
 %               [scalar | {0.5}]
@@ -17,6 +24,7 @@
 % Image may be the only other one that they would want to change for this.
 
 % IRset new options
+%
 % BCDstopTol  - Stopping tolerance for the relative norm change between
 %               iterations in the BCD loop. Different than the one provided
 %               in IRset to allow the user to still set a stopping tol for
@@ -24,9 +32,13 @@
 %               [positive scalar | {1e-3}]
 %
 % Rbounds    - Percentage of R to use as a bound above and below.
-%              Lowerbound is Rvar(i) - Rvar(i) * Rbounds, and
-%              upperbound is Rvar(i) + Rvar(i) * Rbounds.
+%              Lowerbound is max(Rvar) - max(Rvar(i)) * Rbounds, and
+%              upperbound is max(Rvar(i)) + max(Rvar(i)) * Rbounds.
 %              [positive scalar | {0.5}]
+%
+% angleBounds  - Percentage of difference between angles to be used for the
+%              bounds. Assumes angles are equally spaced.
+%              [positve scalar | {0.5}]
 %
 % nonlinSolver - Which solver to use for the non-linear least squares
 %               problem. imfil requires the imfil package and lsqnonlin
@@ -47,6 +59,7 @@
 %                IRset to allow user to use IR set for least squares solver
 %                too.
 %                [{'lsqr'},'cgls','irn','fista']
+% dispIter     - Display the iteration during each loop of the BCD
 %
 % Anderson Acceleration Only
 %      maxRes - The maximum number of residuals allowed in the anderson

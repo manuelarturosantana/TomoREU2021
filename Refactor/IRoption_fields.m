@@ -106,6 +106,7 @@ allfields = {'x0';
     'accel'; %'anderson''ironstuck',secant,'none'
     'BCDmaxIter'; %This is here so we can pass this function into the solver as well
     'BCDlsSolver'; %"gcls","lsqr","fista","irn"
+    'dispIter';
     %Anderson Acceleration Only
     'maxRes'; %'3'
     'dropTol'; %'1e6'

@@ -1,4 +1,4 @@
-function options = IRset_var(varargin)
+function options = IRset(varargin)
 %IRset Set options for IR Tools functions
 %
 % options = IRset('param1',value1,'param2',value2,...)
@@ -353,6 +353,8 @@ switch field
     [validvalue,errmsg] = PosInteger(field,value);
   case {'BCDlsSolver'} %Damped least squares solver. 
     [validvalue,errmsg] = lsSolverType(field,value);
+  case {'dispIter'}
+    [validvalue,errmsg] = onOffType(field,value);
   case {'maxRes'} % positive integer
     [validvalue,errmsg] = PosInteger(field,value);
   case {'dropTol'} %real non-negative scalar
@@ -809,9 +811,9 @@ else
 end
 %------------------------------------------------------------------------
 function [valid, errmsg] = lsSolverType(field,value)
-valid = any(strcmpi(value,{'gcls','lsqr','fista','irn'}));
+valid = any(strcmpi(value,{'cgls','lsqr','fista','irn'}));
 if ~valid
- errmsg = sprintf('Invalid value for OPTIONS parameter %s: must be "gcls","lsqr","fista","irn".',field);
+ errmsg = sprintf('Invalid value for OPTIONS parameter %s: must be "cgls","lsqr","fista","irn".',field);
 else
   errmsg = '';
 end
