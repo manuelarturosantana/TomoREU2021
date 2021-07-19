@@ -81,7 +81,7 @@ paramTrue = [probInfo.true.Rpert probInfo.true.anglePert];
 xtrue     = probInfo.true.x;
 
 % Create the A matrix from the initial parameter guess
-A = createA(probInfo.n, probInfo.TomoInfo.Rvar, probInfo.anglesvar, probInfo);
+A = createA(probInfo.n, probInfo.TomoInfo.Rvar, probInfo.anglesvar, probInfo.TomoInfo);
 
 %Select the Tikhonov Regularization solver 
 if strcmp(options.BCDlsSolver,'lsqr')
@@ -102,6 +102,9 @@ tic
 %Solve for the first iteration of x, passing in options which contains
 %IRoptions.
 [x_curr, ~] = lsSolver(A, b,options);
+if strcmp(options.dispIter,'on')
+        fprintf('BCD iteration %d completed \n',1)
+end
 
 %Initialize the Rparameters and angle parameters, assuming intial guess of
 %no perturbations.
@@ -158,7 +161,7 @@ for i = 2:options.BCDmaxIter
     Rvals = probInfo.TomoInfo.Rvar + RParams;
     angleParams = p((length(p) / 2) + 1:end);
     Theta_k = probInfo.anglesvar + angleParams;
-    A = createA(probInfo.n,Rvals,Theta_k,probInfo);
+    A = createA(probInfo.n,Rvals,Theta_k,probInfo.TomoInfo);
     %After building A we minimize in the x block coordinate.
     [x_curr, ~] = lsSolver(A,b,options);
     xs = [xs,x_curr];
@@ -184,5 +187,5 @@ end
     iterInfo.RErrors = RErrors;
     iterInfo.angErrors = angErrors;
     iterInfo.numIter   = i;
-    iterInfo.runTime = toc;
+    iterInfo.runTime = runTime;
 end

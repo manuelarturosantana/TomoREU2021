@@ -57,7 +57,7 @@ isImfil         = true;
 % 'spine.tif' to the image you want to use.
  image           = imresize(double(imread('spine.tif')),[256,256]);
 %image           = 'sheppLogan';
-runDescription   = "This is the standard test using Irons-Tuck Acceloration."
+runDescription   = "This is the standard test using the Crossed Secant method, as with x and the parameters in the vector." 
 
 % Don't Forget to change the filename at the bottom.
 
@@ -192,7 +192,9 @@ x_curr = [x0;RParams';angleParams'];
 BCDinfo.x = x0;
 %Initialize old parameters to begin Crossed Secant loop
 [G_old, iterInfo] = fpBCD_var(BCDinfo);
+%The next two lines initialize the second starting point needed for the CS method.
 delta_x_old = G_old - x_curr;
+x_curr = G_old;
 %Update the old parameters and save for plotting
 x_k = x_curr(1:length(x0));
 p_0 = x_curr(length(x0) + 1: end);
@@ -208,11 +210,12 @@ xs = [xs, x_k];
 xErrors = [xErrors,norm(x_k - xtrue) / norm(xtrue)];
 pErrors = [pErrors,norm(paramTrue - p_0)/norm(paramTrue)];
 RErrors = [RErrors,norm(RPert - RParams) / norm(RPert)];
-angErrors = [angErrors,norm(angleParams - angle_pert)/norm(angle_pert)];;
+angErrors = [angErrors,norm(angleParams - angle_pert)/norm(angle_pert)];
 
 %This enters the AABCD optimization loop.
 for k = 1:optIter - 1
-    [G_curr, iterInfo] = fpBCD(BCDinfo);
+    disp(k)
+    [G_curr, iterInfo] = fpBCD_var(BCDinfo);
     delta_x_curr = G_curr - x_curr;
     %Change the BCD info for calculating composed G
     %The second difference quoient of x

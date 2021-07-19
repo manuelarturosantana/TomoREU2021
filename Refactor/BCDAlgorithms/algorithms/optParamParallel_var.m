@@ -37,10 +37,11 @@ function paramVec = optParamParallel_var(RParams,angleParams,probInfo,budget,opt
     PRoptions = probInfo.TomoInfo;
     Rstart = probInfo.TomoInfo.Rvar;
     
-    parfor i = 1:numPerts
+    for i = 1:numPerts
         probBounds = [Rbounds(i,:); angleBounds(i,:)];
         x = lsqAp_var(n,RParams(i),angleParams(i),angles(:,i),probBounds,...
             budget,PRoptions,optOptions,b(:,i),x_curr,Rstart(i));
+        %Each sub problem only depends on one R and angle val.
         Rvals(i) = x(1);
         angleVals(i) = x(2);
     end

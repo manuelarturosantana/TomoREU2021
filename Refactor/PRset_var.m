@@ -3,7 +3,7 @@ function options = PRset_var(varargin)
 %
 % options = PRset('param1',value1,'param2',value2,...)
 %
-% Create/alter options structure for test problems in IT Tools, in which
+% Create/alter options structure for the IRbcd test problem, in which
 % the named parameters have the specified values.  Any unspecified
 % parameters are set to [] (they indicate to use the default value for that 
 % parameter when passed to an test problem). It is sufficient to type only

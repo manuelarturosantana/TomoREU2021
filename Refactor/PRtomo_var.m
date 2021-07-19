@@ -83,10 +83,11 @@ anglesvar = reshape(ProbOptions.angles,[],numPerts);
 ProbInfo.anglesvar = anglesvar;
 
 % Add the perturbations and save the true information
-anglePertTrue = ProbOptions.anglespert * (rand(1,numPerts) - 0.5);
-anglesTrue    = anglesvar + anglePertTrue;
 Rperttrue     = ProbOptions.Rpert * (rand(1,numPerts) - 0.5);
 Rtrue         = ProbOptions.Rvar + Rperttrue;
+anglePertTrue = ProbOptions.anglespert * (rand(1,numPerts) - 0.5);
+anglesTrue    = anglesvar + anglePertTrue;
+
 
 %Save the true information
 ProbInfo.true.anglePert = anglePertTrue; 
@@ -94,6 +95,9 @@ ProbInfo.true.angles    = anglesTrue;
 ProbInfo.true.Rpert     = Rperttrue;
 ProbInfo.true.Rvar      = Rtrue;
 
+%intialize the span
+span = 2*atand(1/(2*max(Rtrue)-1));
+ProbOptions.span = span;
 
 createOpts = PRset_var(ProbOptions, 'R', Rtrue(1),'angles',anglesTrue(:,1));
 [~,b, xTrue, ProbParams] = PRtomo(n, createOpts);
@@ -131,11 +135,11 @@ function options = PRtomo_varDefaults(ProbOptions)
         ProbOptions.angles = 0:2:358;
     end
     if isempty(ProbOptions.bnoise)
-        ProbOptions.bnoise = 0.1;
+        ProbOptions.bnoise = 0.01;
     end
     ProbOptions.CTtype = 'fancurved';
     %intialize the span
-    span = 2*atand(1/(2*max(ProbOptions.Rvar)-1));
-    ProbOptions.span = span;
+%     span = 2*atand(1/(2*max(ProbOptions.Rvar)-1));
+%     ProbOptions.span = span;
     options = ProbOptions;
 end
