@@ -190,9 +190,13 @@ BCDinfo.IRoptions = IRoptions;
 %Intialization for Crossed Secant
 x_curr = x0;
 BCDinfo.x = x_curr;
+
 %Initialize old parameters to begin Crossed Secant loop
 [G_old, iterInfo] = fpBCD(BCDinfo);
 delta_x_old = G_old - x_curr;
+%The next two lines initialize the second starting point needed for the CS method.
+delta_x_old = G_old - x_curr;
+x_curr = G_old;
 
 %Update the current x guess in the BCD info.
 BCDinfo.RParams = iterInfo.RParams;

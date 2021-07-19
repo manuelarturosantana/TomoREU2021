@@ -193,6 +193,10 @@ BCDinfo.x = x0;
 %Initialize old parameters to begin Crossed Secant loop
 [G_old, iterInfo] = fpBCD_var(BCDinfo);
 delta_x_old = G_old - x_curr;
+
+%The next two lines initialize the second starting point needed for the CS method.
+x_curr = G_old;
+
 %Update the old parameters and save for plotting
 x_k = x_curr(1:length(x0));
 p_0 = x_curr(length(x0) + 1: end);
