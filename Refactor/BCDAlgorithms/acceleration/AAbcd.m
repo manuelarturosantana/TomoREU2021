@@ -1,6 +1,6 @@
-function [x,iterInfo] = ITbcd(b,options,probInfo)
-% Performs the block coordinate descent without any acceleration technique
-%  [x,iterInfo] = NAbcd(b,options,probInfo)
+function [x,iterInfo] = AAbcd(b,options,probInfo)
+% Performs the block coordinate descent using Anderson Acceleration
+%  [x,iterInfo] = AAbcd(b,options,probInfo)
 %  Inputs:
 %       b: Sinogram vector from PRtomo_var
 %  options: structure from IRset. Contains the usual fields that can be
@@ -145,30 +145,104 @@ else
     error('BCD nonlinear optimization function not recognized')
 end
 
-%This enters the BCD optimization loop.
-for i = 2:options.BCDmaxIter
+%Initialization for Anderson Acceleration
+G = [ ];
+num_stored_residuals = 0;
+
+%This enters the AABCD optimization loop.
+for k = 2:options.BCDmaxIter 
     x_old = x_curr;
-    [G, p] = fpBCD(options,probInfo,RParams,angleParams,optOptions,b,x_curr,bounds,lsSolver);
-    delta_x = G - x_curr;
-    %This is G(G(x_n)) now x_curr passed in is G
-    [GoG,~] = fpBCD(options,probInfo,RParams,angleParams,optOptions,b,G,bounds,lsSolver);
-    delta_G = GoG - G;
-    %The second difference quoient of x
-    delta_x2 = delta_G - delta_x;
-    %The accelerated x
-    x_curr = GoG - (dot(delta_G, delta_x2)/norm(delta_x2)^2) * delta_G;
-    
+
+    [g_curr, p] = fpBCD(options,probInfo,RParams,angleParams,optOptions,b,x_curr,bounds,lsSolver);
+    f_curr = g_curr - x_curr;
+    if k > 2
+        %Form G on the second iteration.
+        delta_f = f_curr - f_old;
+        delta_g = g_curr - g_old;
+
+        %Update the columns on G
+        if num_stored_residuals < options.maxRes
+            G = [G delta_g];
+        else
+            G = [G(:,2:end) delta_g];
+        end
+        %We update this even though the second step doesn't actually
+        %increase the number of columns to G. This is a work saving step
+        %because we have to redo the QR factorization of F, but will need G
+        %in this size later.
+        num_stored_residuals = num_stored_residuals + 1;
+    end
+    %Set f and g old for calculating delta f the next iteration.
+    f_old = f_curr; g_old = g_curr;
+    %Sets the x value on the first iteration
+    if num_stored_residuals == 0
+        x_curr = g_curr;
+    else
+        %one vector QR factorization
+        if num_stored_residuals == 1 
+            Q(:,1) = delta_f / norm(delta_f);
+            R(1,1) = norm(delta_f);
+        else
+            %delete a QR column if too many.
+            if num_stored_residuals > options.maxRes
+                [Q,R] = qrdelete(Q,R,1);
+                num_stored_residuals = num_stored_residuals - 1;
+                %This deals with a qrdelete usage explained below.
+                if size(R,1) ~= size(R,2)
+                    Q = Q(:,1:num_stored_residuals -1);
+                    R = R(1:num_stored_residuals - 1,:);
+                end
+                %Explination: If Q is not square then the matlab function
+                %QR delete removes one column of Q, and and column and row
+                %of R. If Q is square then the column demenion of Q is not
+                %reduced, and R only has a column removed. This behavior is
+                %to account for thick QR decompoitions, but since we are 
+                %using a thin one we must correct if this happens.
+            end
+            %One pass of modified Gram-Schmidt to update the QR
+            %factorization. Recall this uses the fact that since F = QR
+            %then the column of F is a linear combination of columns of Q
+            %with coefficents coming from the last column of R.
+            for i = 1:num_stored_residuals -1 
+                R(i,num_stored_residuals) = Q(:,i)' * delta_f;
+                delta_f = delta_f - R(i,num_stored_residuals) * Q(:,i); 
+            end
+            %Completing the Graham-Scmidt Iteration
+            R(num_stored_residuals,num_stored_residuals) = norm(delta_f);
+            Q = [Q,delta_f / norm(delta_f)]; 
+        end
+        %Here we delete more columns in the QR factorization to deal with
+        %poor conditioning of the R matrix that may occur.
+        while (cond(R)) > options.dropTol && num_stored_residuals > 1
+           [Q,R] = qrdelete(Q,R,1);
+           num_stored_residuals = num_stored_residuals - 1;
+           %If we change the size of the QR, we must also change the size
+           % of G.
+           G = G(2:end);
+           %See above explination for this step
+           if size(R,1) ~= size(R,2)
+                    Q = Q(:,1:num_stored_residuals -1);
+                    R = R(1:num_stored_residuals - 1,:);
+           end
+        end
+       gamma = R \ (Q' * f_curr);
+       %updating the x info based on the anderson acceleration.
+       x_curr = g_curr - G * gamma;
+    end
+
+    %Separate the parameter vector.
     RParams = p(1:length(p) / 2);
     angleParams = p((length(p) / 2) + 1:end);
-    xs = [xs,x_curr];
     
+    %Store the errors for plotting at each iteration.
+    xs = [xs,x_curr];
     xErrors = [xErrors norm(x_curr - xtrue)/norm(xtrue)];
     pErrors = [pErrors norm(paramTrue - [RParams angleParams])/norm(paramTrue)];
     RErrors = [RErrors norm(probInfo.true.Rpert - RParams) / norm(probInfo.true.Rpert)];
-    angErrors = [angErrors norm(angleParams - probInfo.true.anglePert)/norm(probInfo.true.anglePert)];
+    angErrors = [angErrors norm(angleParams - probInfo.true.anglePert)/norm(probInfo.true.anglePert)];   
     
     if strcmp(options.dispIter,'on')
-        fprintf('BCD iteration %d completed \n',i)
+        fprintf('BCD iteration %d completed \n',k) 
     end
     %Stopping condition
     if norm(x_curr - x_old) / norm(x_old) < options.BCDStopTol
@@ -181,8 +255,8 @@ end
     iterInfo.xErrors = xErrors;
     iterInfo.pErrors = pErrors;
     iterInfo.RErrors = RErrors;
-    iterInfo.angErrors = angErrors;
-    iterInfo.numIter   = i;
+    iterInfo.angleErrors = angErrors;
+    iterInfo.numIter   = k;
     iterInfo.runTime = runTime;
     iterInfo.xsols = xs;
 end

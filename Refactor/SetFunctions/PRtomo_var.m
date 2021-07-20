@@ -99,12 +99,12 @@ ProbInfo.true.Rvar      = Rtrue;
 span = 2*atand(1/(2*max(Rtrue)-1));
 ProbOptions.span = span;
 
-createOpts = PRset_var(ProbOptions, 'R', Rtrue(1),'angles',anglesTrue(:,1));
+createOpts = PRset(ProbOptions, 'R', Rtrue(1),'angles',anglesTrue(:,1));
 [~,b, xTrue, ProbParams] = PRtomo(n, createOpts);
 %save the true image.
 ProbInfo.true.x = xTrue;
  for j = 2:numPerts
-     createOpts = PRset_var(ProbOptions, 'R', Rtrue(j),'angles',anglesTrue(:,j));
+     createOpts = PRset(ProbOptions, 'R', Rtrue(j),'angles',anglesTrue(:,j));
      [~, bj, ~, ~] = PRtomo(n, createOpts);
      b = [b; bj];
  end

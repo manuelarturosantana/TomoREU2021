@@ -38,7 +38,6 @@ function A = createA(n,Rvals,angVals,ProbOptions)
 %  A : Sparse matrix or function handle for forward/adjoint problem.
 %
 
-one = 1;
 
 %Set up the info passed into each PRset
 PRoptions = ProbOptions;

@@ -1,5 +1,6 @@
-function options = PRset_var(varargin)
-%PRset Set options for IR Tools test problems
+function options = PRset(varargin)
+%PRset Set options for IR Tools test problems modified for BCD on
+%tomography problems.
 %
 % options = PRset('param1',value1,'param2',value2,...)
 %
