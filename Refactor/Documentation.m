@@ -1,6 +1,21 @@
-% This is the beginning of the documentation for the new PRset and IRset
-% function.
+% This file describes the new options for PRset and IRset that have been
+% added in order to simulate the computed tomography problem with unknown
+% geometry parameters and the BCD loop to correct for that. 
 %
+% In addition to the IRtools and AIRtoolsII package the following packages
+% and toolboxes are either required or recommended. 
+%
+% Required
+%       either 
+%       matlab optimization toolbox <https://www.mathworks.com/products/optimization.html>
+%       imfil package <https://ctk.math.ncsu.edu/imfil.html>
+% 
+% Strongly Recommended
+%       matlab parallel computing toolbox <https://www.mathworks.com/products/parallel-computing.html>
+%       Note that the code is written to run in parallel automatically if
+%       the matlab parallel computing toolbox is installed, but will still
+%       run if it isn't.
+% 
 % PRset new options 
 %
 % Rvar     -  vector containing the r value for each time the angles are
