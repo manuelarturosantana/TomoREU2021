@@ -11,8 +11,8 @@ function [x,iterInfo] = IRbcd(b,iterOptions,probInfo)
        [x,iterInfo] = NAbcd(b,iterOptions,probInfo);
     elseif strcmpi(iterOptions.accel,'anderson')
         [x,iterInfo] = AAbcd(b,iterOptions,probInfo);
-%     elseif strcmpi(iterOptions.accel,'ironstuck')
-%         [x,iterInfo] = ITbcd(b,iterOptions,probInfo);
+    elseif strcmpi(iterOptions.accel,'ironstuck')
+        [x,iterInfo] = ITbcd(b,iterOptions,probInfo);
 %     elseif strcmpi(iterOptions.accel,'secant')
 %         [x,iterInfo] = CSbcd(b,iterOptions,probInfo);
     else

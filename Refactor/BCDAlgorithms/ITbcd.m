@@ -1,4 +1,4 @@
-function [x,iterInfo] = NAbcd(b,options,probInfo)
+function [x,iterInfo] = ITbcd(b,options,probInfo)
 % Performs the block coordinate descent without any acceleration technique
 %  [x,iterInfo] = NAbcd(b,options,probInfo)
 %  Inputs:
@@ -148,7 +148,16 @@ end
 %This enters the BCD optimization loop.
 for i = 2:options.BCDmaxIter
     x_old = x_curr;
-    [x_curr,p] = fpBCD(options,probInfo,RParams,angleParams,optOptions,b,x_curr,bounds,lsSolver);
+    [G, p] = fpBCD(options,probInfo,RParams,angleParams,optOptions,b,x_curr,bounds,lsSolver);
+    delta_x = G - x_curr;
+    %This is G(G(x_n)) now x_curr passed in is G
+    [GoG,~] = fpBCD(options,probInfo,RParams,angleParams,optOptions,b,G,bounds,lsSolver);
+    delta_G = GoG - G;
+    %The second difference quoient of x
+    delta_x2 = delta_G - delta_x;
+    %The accelerated x
+    x_curr = GoG - (dot(delta_G, delta_x2)/norm(delta_x2)^2) * delta_G;
+    
     RParams = p(1:length(p) / 2);
     angleParams = p((length(p) / 2) + 1:end);
     xs = [xs,x_curr];
