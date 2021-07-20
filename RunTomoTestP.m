@@ -38,21 +38,22 @@
                 rng(5);
 n               = 64;
 m               = 4;   
-Rnoise          = 0.5;
+Rnoise          = 0.25;
 Rnoise_guess    = 0;
 Rguess          = 2;
 RPert           = Rnoise*(rand(1,m) - 0.5);
 Rtrue           = Rguess*ones(1,m) + RPert;
 angles_guess    = (0:2:358);
 ang_noise_guess = 0;
-ang_noise       = 0.5;
+ang_noise       = 0.25;
 p               = length(angles_guess)/m; 
-span            = 2*atand(1/(2*max(Rtrue)-1));
-image           = imresize(double(imread('spine.tif')),[256 256]);
+span            = 2*atand(1/(2*max(Rguess)-1));
+% image           = imresize(double(imread('spine.tif')),[256 256]);
+image           = 'sheppLogan';
 ProbOptions     = PRset('CTtype', 'fancurved', 'span', span,'phantomImage',image);
 budget          = 100 * 2 * m;
 func_delt       = 1e-6;
-optIter         = 7;
+optIter         = 5;
 isImfil         = true;
 isImBCD         = false;
 
@@ -61,10 +62,10 @@ isImBCD         = false;
 % angle perterbation to.
 %
 
-R_lower = -0.5;
-R_upper = 0.5;
-angle_lower = -0.5;
-angle_upper = 0.5;
+R_lower = -0.25;
+R_upper = 0.25;
+angle_lower = -0.25;
+angle_upper = 0.25;
 
 
 %
@@ -113,6 +114,7 @@ paramTrue = [RPert angle_pert];
 % using the true A and the guess for A
 %
 [x1, info1] = IRhybrid_lsqr(Atrue, b);
+disp("Now for x2")
 [x2, info2] = IRhybrid_lsqr(A, b);
 
 figure(1), clf
