@@ -9,7 +9,7 @@ rng(5) %Set the random number generator for reproducibility.
 
 % Here in declare an image string avaliable in PRset, or one of your own.
 % Must be square.
-image = 'sheppLogan';
+image = imresize(double(imread('cameraman.tiff')),[64,64]);
 
 %PRset sets the options for the tomography problem. 
 ProbOptions = PRset('Rvar',2 * ones(1,4),'Rpert',0.25,'anglespert',0.25,'phantomImage',image);
@@ -20,8 +20,8 @@ ProbOptions = PRset('Rvar',2 * ones(1,4),'Rpert',0.25,'anglespert',0.25,'phantom
 
 % Here we initialize the IR options. See the file Documentation.m or IRbcd
 % for a list of the options avaliable. 
-iterOptions = IRset('nonlinSolver','imfil','accel','anderson','BCDmaxIter',10,...
-    'Rbounds',0.1250,'angleBounds',0.1250);
+iterOptions = IRset('nonlinSolver','imfil','BCDmaxIter',20,...
+    'Rbounds',0.1250,'angleBounds',0.1250,'BCDlsSolver','fista');
 
 %This function runs the BCD loop. See the IRbcd documentation for what
 %iterInfo contains.

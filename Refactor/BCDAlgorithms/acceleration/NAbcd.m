@@ -125,7 +125,16 @@ xs = x_curr;
 Rmax = max(probInfo.TomoInfo.Rvar);
 R_lower = - Rmax * options.RBounds; %Optimization is over the perturbations.
 R_upper =  Rmax * options.RBounds;
-angleDiff = probInfo.anglesvar(2,1) - probInfo.anglesvar(1,1);
+
+
+%The next block is to account for the case of perterbations at every angle.
+[n,~] = size(probInfo.anglesvar); 
+if n == 1
+   angleDiff = probInfo.anglesvar(2) - probInfo.anglesvar(1);
+else
+    angleDiff = probInfo.anglesvar(2,1) - probInfo.anglesvar(1,1);
+end
+
 angle_lower = -angleDiff * options.angleBounds;
 angle_upper = angleDiff * options.angleBounds;
 
@@ -176,4 +185,12 @@ end
     iterInfo.numIter   = i;
     iterInfo.runTime = runTime;
     iterInfo.xsols = xs;
+    
+    
+    %Create solution with true parameters and return it.
+    Rvals =   probInfo.TomoInfo.Rvar + probInfo.true.Rpert;
+    angleVals = probInfo.anglesvar + probInfo.true.anglePert; 
+    Atrue = createA(probInfo.n,Rvals,angleVals,probInfo.TomoInfo);
+   [xtrueparam, ~] = lsSolver(Atrue, b,iterOptions);
+   iterInfo.xtrueparam = xtrueparam;
 end

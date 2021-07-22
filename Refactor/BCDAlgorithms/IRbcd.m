@@ -101,13 +101,6 @@ function [x,iterInfo] = IRbcd(b,iterOptions,probInfo)
     else
         error('Acceleration technique not recognized.')
     end
-    
-    %Create solution with true parameters and return it.
-    Rvals =   probInfo.TomoInfo.Rvar + probInfo.true.Rpert;
-    angleVals = probInfo.anglesvar + probInfo.true.anglePert; 
-    Atrue = createA(probInfo.n,Rvals,angleVals,probInfo.TomoInfo);
-   [xtrueparam, ~] = IRhybrid_lsqr(Atrue, b);
-   iterInfo.xtrueparam = xtrueparam;
 
 end
 

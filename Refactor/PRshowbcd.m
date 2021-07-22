@@ -8,9 +8,9 @@ function PRshowbcd(iterInfo,probInfo)
     PRshowx(probInfo.true.x, probInfo.ProbParams)
     title('True Solution','fontsize', 20)
 
-    figure(2), clf
-    PRshowx(iterInfo.xtrueparam,  probInfo.ProbParams)
-    title('Solution with True A','fontsize', 20)
+%     figure(2), clf
+%     PRshowx(iterInfo.xtrueparam,  probInfo.ProbParams)
+%     title('Solution with True A','fontsize', 20)
 
     figure(3), clf
     PRshowx(iterInfo.xsols(:,1),  probInfo.ProbParams)

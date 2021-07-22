@@ -36,7 +36,8 @@
 %              bn = b + noise and ||noise(:)||_2 / ||b(:)||_2 = NoiseLevel
 %              [scalar | {0.1}]
 %
-% Image may be the only other one that they would want to change for this.
+% Note: This is function carries all the same functionality as PRset, so
+% for example if you wish to 
 
 % IRset new options
 %

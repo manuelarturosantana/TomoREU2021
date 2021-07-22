@@ -37,7 +37,7 @@ function paramVec = optParamParallel_var(RParams,angleParams,probInfo,budget,opt
     PRoptions = probInfo.TomoInfo;
     Rstart = probInfo.TomoInfo.Rvar;
     
-    for i = 1:numPerts
+    parfor i = 1:numPerts
         probBounds = [Rbounds(i,:); angleBounds(i,:)];
         x = lsqAp_var(n,RParams(i),angleParams(i),angles(:,i),probBounds,...
             budget,PRoptions,optOptions,b(:,i),x_curr,Rstart(i));
