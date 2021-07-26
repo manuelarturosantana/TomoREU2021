@@ -9,7 +9,7 @@ rng(5) %Set the random number generator for reproducibility.
 
 % Here in declare an image string avaliable in PRset, or one of your own.
 % Must be square.
-image = imresize(double(imread('cameraman.tiff')),[64,64]);
+image = 'sheppLogan';
 
 %PRset sets the options for the tomography problem. 
 ProbOptions = PRset('Rvar',2 * ones(1,4),'Rpert',0.25,'anglespert',0.25,'phantomImage',image);
