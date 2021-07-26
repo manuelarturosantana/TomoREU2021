@@ -1,11 +1,12 @@
 %This script is to be sneaky and show a code example for the poster
 %presentation
+pause
 
 disp(">> n = 256")
 pause
 
 disp(">> ProbOptions = PRset('Rvar',2 * ones(1,4),'Rpert',0.5,'anglespert',0.5);")
-ProbOptions = struct();
+pause
 
 disp(">> [b,probInfo] = PRtomo_var(n,ProbOptions);")
 pause
