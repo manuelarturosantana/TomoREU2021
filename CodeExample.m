@@ -5,13 +5,13 @@ pause
 disp(">> n = 256")
 pause
 
-disp(">> ProbOptions = PRset('Rvar',2 * ones(1,4),'Rpert',0.5,'anglespert',0.5);")
+disp(">> ProbOptions = PRset('Rvar',2 * ones(1,180),'Rpert',0.5,'anglespert',0.5);")
 pause
 
 disp(">> [b,probInfo] = PRtomo_var(n,ProbOptions);")
 pause
 
-fprintf(">> iterOptions = IRset('nonlinSolver','imfil','BCDmaxIter',20,...\n'Rbounds',0.1250,'angleBounds',0.1250,'BCDlsSolver','fista');\n")
+fprintf(">> iterOptions = IRset('nonlinSolver','imfil','BCDmaxIter',20,...\n'Rbounds',0.1250,'angleBounds',0.1250,'BCDlsSolver','irn');\n")
 pause
 
 load IRNcontrol.mat
