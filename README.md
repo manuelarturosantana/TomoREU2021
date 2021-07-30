@@ -16,7 +16,6 @@ For full functionality the following matlab packages and toolboxes should be ins
 * [Imfill](https://ctk.math.ncsu.edu/imfil.html)
 
 The GITHUB repository consists of 4 main folders:
-1. [test_image](test_image) : image to set up test for our algorithm
-2. [test_setup](test_setup) : set up tests
-3. [algorithm](algorithm) : MATLAB functions
-4. [test_reslt](test_reslt) : results produced from the test set-up (reconstructed images, relative error norm graphs)
+1. [Refactor](refactor) : Contains all the needed code beyond the above toolboxes and packages.
+2. [test_image](test_image) : Additionally test images. Matlab image processing toolbox will be needed to use these.
+
