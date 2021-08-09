@@ -4,8 +4,7 @@ Code written to solve tomographic imaging problems during an REU/RET at Emory Un
 The research team, led by Dr. James Nagy from Emory's Mathematics Department, consists of 4 student fellows:
 1.  Mai Phuong Pham Huynh
 2. Manuel Santana
-3. Issa Susa
-4. Ana Castillo
+3. Ana Castillo
 
 In this project, we aim to use computational method to develop a numerical method to jointly estimate the geometry parameters of the portable CT scan device and to reconstruct the image.
 
