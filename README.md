@@ -14,7 +14,7 @@ For full functionality the following matlab packages and toolboxes should be ins
 * [IRtools](https://github.com/jnagy1/IRtools)
 * [Imfill](https://ctk.math.ncsu.edu/imfil.html)
 
-The GITHUB repository consists of 4 main folders:
+The GITHUB repository consists of 2 main folders:
 1. [Refactor](refactor) : Contains all the needed code beyond the above toolboxes and packages.
 2. [test_image](test_image) : Additionally test images. Matlab image processing toolbox will be needed to use these.
 
