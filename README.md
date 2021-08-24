@@ -15,6 +15,6 @@ For full functionality the following matlab packages and toolboxes should be ins
 * [Imfill](https://ctk.math.ncsu.edu/imfil.html)
 
 The GITHUB repository consists of 2 main folders:
-1. [Refactor](refactor) : Contains all the needed code beyond the above toolboxes and packages.
-2. [test_image](test_image) : Additionally test images. Matlab image processing toolbox will be needed to use these.
+1. [Refactor](refactor) : Contains all the needed code beyond the above toolboxes and packages. It includes a script [Refactor_Example1.m](refactor/Refactor_Example1.m) which gives a detailed example of how to run the code.
+2. [test_image](test_image) : Additional test images. Matlab image processing toolbox will be needed to use these.
 
