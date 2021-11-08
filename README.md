@@ -18,3 +18,4 @@ The GITHUB repository consists of 2 main folders:
 1. [Refactor](Refactor) : Contains all the needed code beyond the above toolboxes and packages. It includes a script [Refactored_Example1.m](Refactor/Refactored_Example1.m) which gives a detailed example of how to run the code.
 2. [test_image](test_image) : Additional test images. Matlab image processing toolbox will be needed to use these.
 
+The poster of the project can be found [here](https://github.com/phuongmaihuynhpham/TomoREU2021/blob/main/REU_RETPoster.pptx.pdf).
