@@ -19,3 +19,4 @@ The GITHUB repository consists of 2 main folders:
 2. [test_image](test_image) : Additional test images. Matlab image processing toolbox will be needed to use these.
 
 The poster of the project can be found [here](https://github.com/phuongmaihuynhpham/TomoREU2021/blob/main/REU_RETPoster.pptx.pdf).
+A video advertisement can be found [here](https://drive.google.com/file/d/1B4ja4Ybyl3xYha8vYYc1tMsaAAqlKlN_/view?usp=sharing).
